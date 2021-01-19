@@ -1,0 +1,171 @@
+package helpers
+
+import (
+	"fmt"
+	"reflect"
+	"regexp"
+	"strconv"
+	"strings"
+
+	"github.com/tkrajina/go-reflector/reflector"
+)
+
+// GetFieldValueFromInterface :: use reflection to return the value of the given property path
+func GetFieldValueFromInterface(i interface{}, fieldName string) (interface{}, bool) {
+	obj := reflector.New(i)
+	if arrayProperty, index, ok := IsFieldArray(fieldName); ok {
+		if arrVal, ok := GetFieldValueFromInterface(i, arrayProperty); ok {
+			return GetArrayValue(arrVal, index)
+		}
+		return nil, false
+	}
+
+	if reflect.TypeOf(i).Kind() == reflect.Map {
+		return obj.GetByKey(fieldName)
+	}
+
+	val, err := obj.Field(fieldName).Get()
+	return val, err == nil
+}
+
+// FieldValueFromInterface :: use reflection to return the value of the given nested property path
+func GetNestedFieldValueFromInterface(item interface{}, propertyPath string) (interface{}, bool) {
+	var value interface{}
+	var ok bool
+	parent := item
+	var pathSegments = strings.Split(propertyPath, ".")
+	for _, propertyName := range pathSegments {
+		value, ok = GetFieldValueFromInterface(parent, propertyName)
+		if !ok {
+			return nil, false
+		}
+		// update parent for next iteration
+		parent = value
+	}
+	return value, true
+}
+
+func GetArrayValue(i interface{}, index int) (interface{}, bool) {
+	if reflect.TypeOf(i).Kind() != reflect.Slice {
+		return nil, false
+	}
+	arrayItems := reflect.ValueOf(i)
+	for idx := 0; idx < arrayItems.Len(); idx++ {
+		if idx == index {
+			return arrayItems.Index(idx).Interface(), true
+		}
+	}
+	return nil, false
+}
+
+//  IsZero :: use reflection to determine whether the given value is the zero value of it's type
+func IsZero(i interface{}) bool {
+	if i == nil {
+		return true
+	}
+	v := reflect.ValueOf(i)
+	z := reflect.Zero(v.Type())
+
+	switch v.Kind() {
+	case reflect.Func, reflect.Map, reflect.Slice:
+		return v.IsNil()
+	case reflect.Array, reflect.Struct:
+		return reflect.DeepEqual(v.Interface(), z.Interface())
+	default:
+		// Compare other types directly:
+		return v.Interface() == z.Interface()
+	}
+}
+
+func InstantiateType(t reflect.Type) interface{} {
+	return reflect.Zero(t).Interface()
+}
+
+// if val is a pointer, dereference it
+func DereferencePointer(val interface{}) interface{} {
+	// If the value is a pointer to a non-struct, get its value and use that.
+	reflectVal := reflect.ValueOf(val)
+	if reflectVal.Kind() == reflect.Ptr {
+		if reflectVal.IsNil() {
+			// If the pointer is nil, then the value is just nil
+			val = nil
+		} else {
+			// Otherwise, we dereference the pointer
+			reflectVal = reflect.Indirect(reflectVal)
+			val = reflectVal.Interface()
+		}
+	}
+	return val
+}
+
+/*
+	TODO: add support for multi-dimensional arrays
+ 	like - arr[1][2] arr[1][2][3] and so on..
+*/
+func IsFieldArray(fieldName string) (string, int, bool) {
+	r := regexp.MustCompile(`^(.*)\[(\d+)\]$`)
+	captureGroups := r.FindStringSubmatch(fieldName)
+	if len(captureGroups) == 0 {
+		return "", 0, false
+	}
+	arrayName := captureGroups[1]
+	// check if arrayName contains index and brackets - arr[12]
+	// this would indicate a multi-level array which we do not support at present
+	subGroups := r.FindStringSubmatch(arrayName)
+	if len(subGroups) > 0 {
+		return "", 0, false
+	}
+	arrayIndex, err := strconv.Atoi(captureGroups[2])
+	return arrayName, arrayIndex, err == nil
+}
+
+//  ExecuteMethod :: use reflection to invoke method. We do not support functions which expect parameters.
+func ExecuteMethod(item interface{}, methodName string) (returnValues []interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", r)
+		}
+	}()
+
+	var ptr reflect.Value
+	var value reflect.Value
+	var finalMethod reflect.Value
+
+	value = reflect.ValueOf(item)
+
+	if value.Type().Kind() == reflect.Ptr {
+		ptr = value
+		value = ptr.Elem()
+	} else {
+		ptr = reflect.New(reflect.TypeOf(item))
+		temp := ptr.Elem()
+		temp.Set(value)
+	}
+
+	// check for method on value
+	method := value.MethodByName(methodName)
+	if method.IsValid() {
+		finalMethod = method
+	}
+	// check for method on pointer
+	method = ptr.MethodByName(methodName)
+	if method.IsValid() {
+		finalMethod = method
+	}
+
+	if !finalMethod.IsValid() {
+		return nil, fmt.Errorf("method %s is not valid", methodName)
+	}
+
+	methodResults := finalMethod.Call([]reflect.Value{})
+	returnValues = make([]interface{}, len(methodResults))
+	for i, r := range methodResults {
+		returnValues[i] = r.Interface()
+		switch v := returnValues[i].(type) {
+		case error:
+			err = v
+			return
+		}
+	}
+	return
+}
