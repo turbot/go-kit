@@ -1,4 +1,4 @@
-module github.com/turbotio/go-kit
+module github.com/turbot/go-kit
 
 go 1.15
 
