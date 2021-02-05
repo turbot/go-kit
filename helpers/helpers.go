@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -35,4 +36,13 @@ func FileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+// ToError :: if supplied value is already an error, return it, otherwise format it as an error
+func ToError(val interface{}) error {
+	if e, ok := val.(error); ok {
+		return e
+	} else {
+		return fmt.Errorf("%v", val)
+	}
 }
