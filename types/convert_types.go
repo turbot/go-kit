@@ -11,14 +11,23 @@ import (
 )
 
 // SafeString :: convert a value from *string to string. If it is already a string, just return it
+// if the interface is not a string or *string, return empty string
 func SafeString(x interface{}) string {
+	str, _ := CastString(x)
+	return str
+}
+
+// CastString :: cast an interface to a string
+// if the interface is not a string or *string, return empty string and a 'false' result
+// This is the same as SafeString except it also returns a success flag
+func CastString(x interface{}) (string, bool) {
 	switch v := x.(type) {
 	case *string:
-		return StringValue(v)
+		return StringValue(v), true
 	case string:
-		return v
+		return v, true
 	}
-	return ""
+	return "", false
 }
 
 // ToString :: convert most types value to a string
