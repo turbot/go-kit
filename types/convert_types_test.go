@@ -254,6 +254,41 @@ func TestToBool(t *testing.T) {
 	}
 }
 
+var testCasesToBoolPtr = []numberConversionTest{
+	{"bool true", numberConversionInputData._bool_true, true},
+	{"bool false", numberConversionInputData._bool_false, false},
+	{"string true", numberConversionInputData._string_true, true},
+	{"string TRUE", numberConversionInputData._string_TRUE, true},
+	{"string on", numberConversionInputData._string_on, true},
+	{"string enabled", numberConversionInputData._string_enabled, true},
+	{"string false", numberConversionInputData._string_false, false},
+	{"string off", numberConversionInputData._string_off, false},
+	{"string disabled", numberConversionInputData._string_disabled, false},
+	{"int 1", numberConversionInputData._int_1, nil},
+	{"random string", numberConversionInputData._random_string, nil},
+	{"random string", nil, nil},
+}
+
+func TestToBoolPtr(t *testing.T) {
+	for _, test := range testCasesToBoolPtr {
+		output := ToBoolPtr(test.input)
+		if output == nil {
+			if test.expected != nil {
+				t.Errorf(`Test: '%s'' FAILED : unexpected nil result - expected %v`, test.name, test.expected)
+			}
+			return
+		}
+
+		if test.expected == nil && output != nil {
+			t.Errorf(`Test: '%s'' FAILED : expected error but did not get one`, test.name)
+		}
+
+		if *output != test.expected.(bool) {
+			t.Errorf(`Test: '%s'' FAILED : expected %v, got %v`, test.name, test.expected, output)
+		}
+	}
+}
+
 var testCasesToInt64 = []numberConversionTest{
 	{"bool", numberConversionInputData._bool_false, "ERROR"},
 	{"int 8", numberConversionInputData._int8, int64(numberConversionInputData._int8)},

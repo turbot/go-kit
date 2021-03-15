@@ -275,6 +275,19 @@ func ToTime(i interface{}) (timeVal time.Time, err error) {
 	return
 }
 
+// ToBoolPtr :: convert interface to a bool pointer
+// if the value is nil, or there is a conversion error, return nil
+func ToBoolPtr(i interface{}) *bool {
+	if i == nil {
+		return nil
+	}
+	res, err := ToBool(i)
+	if err != nil {
+		return nil
+	}
+	return &res
+}
+
 // ToBool :: convert interface to an bool
 // if interface is not convertible or parseable as a bool, return an error
 func ToBool(i interface{}) (boolValue bool, err error) {
