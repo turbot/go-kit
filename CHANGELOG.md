@@ -1,3 +1,8 @@
+## v0.1.3 [2021-03-17]
+
+_Bug fixes?_
+* Handle null pointers in ToBool
+
 ## v0.1.2 [2021-03-15]
 
 _What's new?_
