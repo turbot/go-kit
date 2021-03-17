@@ -303,12 +303,20 @@ func ToBool(i interface{}) (boolValue bool, err error) {
 
 	switch v := i.(type) {
 	case *string:
+		if v == nil {
+			err = fmt.Errorf(`null string pointer passed to ToBool`)
+			break
+		}
 		boolValue = StringToBool(*v)
 	case string:
 		boolValue = StringToBool(v)
 	case bool:
 		boolValue = v
 	case *bool:
+		if v == nil {
+			err = fmt.Errorf(`null bool pointer passed to ToBool`)
+			break
+		}
 		boolValue = *v
 	default:
 		err = fmt.Errorf(`invalid value '%v' passed to ToBool, must one of: bool, *bool, string, *string`, i)
