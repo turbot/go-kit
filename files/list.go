@@ -50,11 +50,25 @@ func ListFiles(listPath string, opts *ListFilesOptions) ([]string, error) {
 	return listFilesFlat(listPath, opts)
 }
 
+// InclusionsFromExtensions :: take a list of file extensions and convert into a .gitgnore format inclusions list
+func InclusionsFromExtensions(extensions []string) []string {
+	// build include string from extensions
+	var includeStrings []string
+	for _, extension := range extensions {
+		includeStrings = append(includeStrings, fmt.Sprintf("**/*%s", extension))
+	}
+	return includeStrings
+}
+
 func listFilesRecursive(listPath string, opts *ListFilesOptions) ([]string, error) {
 	var res []string
 	err := filepath.Walk(listPath,
 		func(path string, entry os.FileInfo, err error) error {
 			if err != nil {
+				if _, ok := err.(*os.PathError); ok {
+					// ignore path errors - this may be for a file which has been removed during the walk
+					return nil
+				}
 				return err
 			}
 			// ignore list path itself

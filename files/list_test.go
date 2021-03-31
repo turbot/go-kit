@@ -193,17 +193,19 @@ func TestListFiles(t *testing.T) {
 			if test.expected != "ERROR" {
 				t.Errorf("Test: '%s'' FAILED with unexpected error: %v", name, err)
 			}
-			return
+			continue
 		}
 
 		if test.expected == "ERROR" {
 			t.Errorf("Test: '%s'' FAILED - expected error", name)
+			continue
 		}
 
 		// now remove loacl path from files for expectation testing (as expectations are relative)
 		localDirectory, err := os.Getwd()
 		if err != nil {
 			t.Errorf("failed to get working directory %v", err)
+			continue
 		}
 
 		for i, f := range files {

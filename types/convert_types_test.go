@@ -239,13 +239,15 @@ func TestToBool(t *testing.T) {
 	for _, test := range testCasesToBool {
 		output, err := ToBool(test.input)
 		if err != nil {
-			if test.expected == "ERROR" {
-				continue
+			if test.expected != "ERROR" {
+				t.Errorf(`Test: '%s'' FAILED : unexpected error %v`, test.name, err)
 			}
-			t.Errorf(`Test: '%s'' FAILED : unexpected error %v`, test.name, err)
+			continue
+
 		}
-		if test.expected == "ERROR" && err == nil {
+		if test.expected == "ERROR" {
 			t.Errorf(`Test: '%s'' FAILED : expected error but did not get one`, test.name)
+			continue
 		}
 
 		if output != test.expected.(bool) {
@@ -306,13 +308,14 @@ func TestToInt64(t *testing.T) {
 	for _, test := range testCasesToInt64 {
 		output, err := ToInt64(test.input)
 		if err != nil {
-			if test.expected == "ERROR" {
-				continue
+			if test.expected != "ERROR" {
+				t.Errorf(`Test: '%s'' FAILED : unexpected error %v`, test.name, err)
 			}
-			t.Errorf(`Test: '%s'' FAILED : unexpected error %v`, test.name, err)
+			continue
 		}
-		if test.expected == "ERROR" && err == nil {
+		if test.expected == "ERROR" {
 			t.Errorf(`Test: '%s'' FAILED : expected error but did not get one`, test.name)
+			continue
 		}
 
 		if output != test.expected.(int64) {
@@ -334,13 +337,14 @@ func TestToFloat64(t *testing.T) {
 	for _, test := range testCasesToFloat64 {
 		output, err := ToFloat64(test.input)
 		if err != nil {
-			if test.expected == "ERROR" {
-				continue
+			if test.expected != "ERROR" {
+				t.Errorf(`Test: '%s'' FAILED : unexpected error %v`, test.name, err)
 			}
-			t.Errorf(`Test: '%s'' FAILED : unexpected error %v`, test.name, err)
+			continue
 		}
-		if test.expected == "ERROR" && err == nil {
+		if test.expected == "ERROR" {
 			t.Errorf(`Test: '%s'' FAILED : expected error but did not get one`, test.name)
+			continue
 		}
 
 		if output != test.expected.(float64) {
