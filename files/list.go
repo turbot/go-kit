@@ -26,11 +26,12 @@ const (
 
 type ListFilesOptions struct {
 	Options ListOption
+	// .gitignore (fnmatch) format patterns for file inclusions and exclusions
 	Include []string
 	Exclude []string
 }
 
-// ListFiles :: recursively list files and or folders
+// ListFiles :: list files and or folders under list path, based on options
 func ListFiles(listPath string, opts *ListFilesOptions) ([]string, error) {
 	// check folder exists
 	if _, err := os.Stat(listPath); os.IsNotExist(err) {
@@ -102,6 +103,7 @@ func listFilesFlat(path string, opts *ListFilesOptions) ([]string, error) {
 	return matches, nil
 }
 
+// should the list results include this entry, based on the list options
 func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListFilesOptions) bool {
 	if entry.IsDir() {
 		// if this is a directory and we are not including directories, exclude
@@ -115,19 +117,27 @@ func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListFilesOptions) 
 		}
 	}
 
+	return ShouldIncludePath(path, opts.Include, opts.Exclude)
+}
+
+// ShouldIncludePath :: does the specified file path satisfy the inclusion and exclusion options (in .gitignore format)
+func ShouldIncludePath(path string, include, exclude []string) bool {
+	// if no include list provided, default to including everything
+	if len(include) == 0 {
+		include = []string{"*"}
+	}
 	// if the entry matches any of the exclude patterns, exclude
-	for _, excludePattern := range opts.Exclude {
+	for _, excludePattern := range exclude {
 		if fnmatch.Match(excludePattern, path, 0) {
 			return false
 		}
 	}
 	// if the entry matches ANY of the include patterns, include
 	shouldInclude := false
-	for _, includePattern := range opts.Include {
+	for _, includePattern := range include {
 		if fnmatch.Match(includePattern, path, 0) {
 			shouldInclude = true
 		}
 	}
-
 	return shouldInclude
 }
