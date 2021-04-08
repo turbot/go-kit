@@ -61,6 +61,16 @@ func InclusionsFromExtensions(extensions []string) []string {
 	return includeStrings
 }
 
+// InclusionsFromFiles :: take a list of file names convert into a .gitgnore format inclusions list
+func InclusionsFromFiles(filenames []string) []string {
+	// build include string from extensions
+	var includeStrings []string
+	for _, extension := range filenames {
+		includeStrings = append(includeStrings, fmt.Sprintf("**/%s", extension))
+	}
+	return includeStrings
+}
+
 func listFilesRecursive(listPath string, opts *ListFilesOptions) ([]string, error) {
 	var res []string
 	err := filepath.Walk(listPath,
