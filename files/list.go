@@ -9,11 +9,10 @@ import (
 	"github.com/danwakefield/fnmatch"
 )
 
-// An ImportMode controls the behavior of the Import method.
-type ListOption uint
+type ListFlag uint
 
 const (
-	Files ListOption = 1 << iota
+	Files ListFlag = 1 << iota
 	Directories
 	Recursive
 	AllFlat              = Files | Directories
@@ -24,28 +23,28 @@ const (
 	DirectoriesFlat      = Directories
 )
 
-type ListFilesOptions struct {
-	Options ListOption
+type ListOptions struct {
+	Flags ListFlag
 	// .gitignore (fnmatch) format patterns for file inclusions and exclusions
 	Include []string
 	Exclude []string
 }
 
 // ListFiles :: list files and or folders under list path, based on options
-func ListFiles(listPath string, opts *ListFilesOptions) ([]string, error) {
+func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 	// check folder exists
 	if _, err := os.Stat(listPath); os.IsNotExist(err) {
 		return nil, nil
 	}
 	if opts == nil {
-		opts = &ListFilesOptions{Options: Files & Directories & Recursive}
+		opts = &ListOptions{Flags: Files & Directories & Recursive}
 	}
 	// if no include list provided, default to including everything
 	if len(opts.Include) == 0 {
 		opts.Include = []string{"*"}
 	}
 
-	if opts.Options&Recursive != 0 {
+	if opts.Flags&Recursive != 0 {
 		return listFilesRecursive(listPath, opts)
 	}
 	return listFilesFlat(listPath, opts)
@@ -71,7 +70,7 @@ func InclusionsFromFiles(filenames []string) []string {
 	return includeStrings
 }
 
-func listFilesRecursive(listPath string, opts *ListFilesOptions) ([]string, error) {
+func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 	var res []string
 	err := filepath.Walk(listPath,
 		func(path string, entry os.FileInfo, err error) error {
@@ -97,7 +96,7 @@ func listFilesRecursive(listPath string, opts *ListFilesOptions) ([]string, erro
 	return res, err
 }
 
-func listFilesFlat(path string, opts *ListFilesOptions) ([]string, error) {
+func listFilesFlat(path string, opts *ListOptions) ([]string, error) {
 	entries, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read folder %s: %v", path, err)
@@ -114,15 +113,15 @@ func listFilesFlat(path string, opts *ListFilesOptions) ([]string, error) {
 }
 
 // should the list results include this entry, based on the list options
-func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListFilesOptions) bool {
+func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListOptions) bool {
 	if entry.IsDir() {
 		// if this is a directory and we are not including directories, exclude
-		if opts.Options&Directories == 0 {
+		if opts.Flags&Directories == 0 {
 			return false
 		}
 	} else {
 		// if this is a file and we are not including files, exclude
-		if opts.Options&Files == 0 {
+		if opts.Flags&Files == 0 {
 			return false
 		}
 	}

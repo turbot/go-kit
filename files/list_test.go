@@ -10,15 +10,15 @@ import (
 
 type ListFilesTest struct {
 	source   string
-	options  *ListFilesOptions
+	options  *ListOptions
 	expected interface{}
 }
 
 var testCasesListFiles = map[string]ListFilesTest{
 	"AllRecursive, exclude **/a*, **/*.swp, **/.steampipe*": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: AllRecursive,
+		options: &ListOptions{
+			Flags:   AllRecursive,
 			Exclude: []string{"**/a*", "**/*.swp", "**/.steampipe*"},
 		},
 		expected: []string{
@@ -32,8 +32,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"AllRecursive": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: AllRecursive,
+		options: &ListOptions{
+			Flags: AllRecursive,
 		},
 		expected: []string{
 			"test_data/list_test1/.steampipe",
@@ -62,8 +62,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"AllFlat": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: AllFlat,
+		options: &ListOptions{
+			Flags: AllFlat,
 		},
 		expected: []string{
 			"test_data/list_test1/.steampipe",
@@ -75,8 +75,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"FilesFlat": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: FilesFlat,
+		options: &ListOptions{
+			Flags: FilesFlat,
 		},
 		expected: []string{
 			"test_data/list_test1/a.swp",
@@ -84,8 +84,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"DirectoriesFlat": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: DirectoriesFlat,
+		options: &ListOptions{
+			Flags: DirectoriesFlat,
 		},
 		expected: []string{
 			"test_data/list_test1/.steampipe",
@@ -96,8 +96,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"DirectoriesRecursive": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: DirectoriesRecursive,
+		options: &ListOptions{
+			Flags: DirectoriesRecursive,
 		},
 		expected: []string{
 			"test_data/list_test1/.steampipe",
@@ -113,8 +113,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"DirectoriesRecursive, exclude  **/.steampipe*": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: DirectoriesRecursive,
+		options: &ListOptions{
+			Flags:   DirectoriesRecursive,
 			Exclude: []string{"**/.steampipe*"},
 		},
 		expected: []string{
@@ -125,8 +125,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"FilesRecursive": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: FilesRecursive,
+		options: &ListOptions{
+			Flags: FilesRecursive,
 		},
 		expected: []string{
 			"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
@@ -146,8 +146,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"FilesRecursive, exclude  **/.steampipe*": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: FilesRecursive,
+		options: &ListOptions{
+			Flags:   FilesRecursive,
 			Exclude: []string{"**/.steampipe*"},
 		},
 		expected: []string{
@@ -164,8 +164,8 @@ var testCasesListFiles = map[string]ListFilesTest{
 	},
 	"FilesRecursive, include exclude  **/.steampipe* **/*.sp": {
 		source: "test_data/list_test1",
-		options: &ListFilesOptions{
-			Options: FilesRecursive,
+		options: &ListOptions{
+			Flags:   FilesRecursive,
 			Exclude: []string{"**/.steampipe*"},
 			Include: []string{"**/*.sp"},
 		},
