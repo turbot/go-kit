@@ -46,3 +46,12 @@ func ToError(val interface{}) error {
 		return fmt.Errorf("%v", val)
 	}
 }
+
+// Tabify :: add tab string to beginning of each line of string
+func Tabify(str string, tab string) string {
+	split := strings.Split(str, "\n")
+	for i, line := range split {
+		split[i] = fmt.Sprintf("%s%s", tab, line)
+	}
+	return strings.Join(split, "\n")
+}
