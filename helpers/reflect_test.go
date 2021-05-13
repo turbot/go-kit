@@ -343,14 +343,17 @@ func TestExecuteMethod(t *testing.T) {
 			if test.expected != "ERROR" {
 				t.Errorf(`Test: '%s'' FAILED : unexpected error %v`, name, err)
 			}
-		} else if test.expected == "ERROR" {
-			t.Errorf(`Test: '%s'' FAILED : expected an error but didn't receive one`, name)
-		} else {
-			expectedValues := test.expected.([]interface{})
-			if !reflect.DeepEqual(expectedValues, returnValues) {
-				t.Errorf(`Test: '%s'' FAILED : expected %v, got %v`, name, test.expected, returnValues)
-			}
+			continue
 		}
+		if test.expected == "ERROR" {
+			t.Errorf(`Test: '%s'' FAILED : expected an error but didn't receive one`, name)
+			continue
+		}
+		expectedValues := test.expected.([]interface{})
+		if !reflect.DeepEqual(expectedValues, returnValues) {
+			t.Errorf(`Test: '%s'' FAILED : expected %v, got %v`, name, test.expected, returnValues)
+		}
+
 	}
 }
 
