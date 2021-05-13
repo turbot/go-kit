@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Tildefy :: convert ~ to home directory
+// Tildefy converts ~ to home directory
 func Tildefy(filePath string) (string, error) {
 	if filePath == "~" || strings.HasPrefix(filePath, "~/") {
 		usr, err := user.Current()
@@ -29,7 +29,7 @@ func Tildefy(filePath string) (string, error) {
 
 }
 
-// FileExists :: checks if a file exists and is not a directory
+// FileExists checks if a file exists and is not a directory
 func FileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
@@ -38,7 +38,7 @@ func FileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-// ToError :: if supplied value is already an error, return it, otherwise format it as an error
+// ToError formats the supplied value as an error (or just returns it if already an error)
 func ToError(val interface{}) error {
 	if e, ok := val.(error); ok {
 		return e
@@ -47,11 +47,18 @@ func ToError(val interface{}) error {
 	}
 }
 
-// Tabify :: add tab string to beginning of each line of string
+// Tabify adds the provided tab string to beginning of each line of string
 func Tabify(str string, tab string) string {
 	split := strings.Split(str, "\n")
 	for i, line := range split {
 		split[i] = fmt.Sprintf("%s%s", tab, line)
 	}
 	return strings.Join(split, "\n")
+}
+
+func TruncateString(str string, length int) string {
+	if len(str) <= length {
+		return str
+	}
+	return fmt.Sprintf("%s…", str[:length-1])
 }
