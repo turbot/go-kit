@@ -60,5 +60,8 @@ func TruncateString(str string, length int) string {
 	if len(str) <= length {
 		return str
 	}
-	return fmt.Sprintf("%s…", str[:length-1])
+	if length <= 3 {
+		return ""
+	}
+	return fmt.Sprintf("%s…", str[:length-3])
 }
