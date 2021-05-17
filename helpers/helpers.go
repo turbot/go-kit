@@ -46,22 +46,3 @@ func ToError(val interface{}) error {
 		return fmt.Errorf("%v", val)
 	}
 }
-
-// Tabify adds the provided tab string to beginning of each line of string
-func Tabify(str string, tab string) string {
-	split := strings.Split(str, "\n")
-	for i, line := range split {
-		split[i] = fmt.Sprintf("%s%s", tab, line)
-	}
-	return strings.Join(split, "\n")
-}
-
-func TruncateString(str string, length int) string {
-	if len(str) <= length {
-		return str
-	}
-	if length <= 3 {
-		return ""
-	}
-	return fmt.Sprintf("%s…", str[:length-3])
-}
