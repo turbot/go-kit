@@ -17,6 +17,14 @@ func Tabify(str string, tab string) string {
 	return strings.Join(split, "\n")
 }
 
+// TabifyStringSlice adds the provided tab string to beginning of each line of string
+func TabifyStringSlice(strs []string, tab string) []string {
+	for i, line := range strs {
+		strs[i] = fmt.Sprintf("%s%s", tab, line)
+	}
+	return strs
+}
+
 // TruncateString limits the string to the given length, adding an ellipsis if the string is being truncated
 func TruncateString(str string, length int) string {
 	// NOTE: this function does not handle (i.e. ignore) ansi color codes in strings
