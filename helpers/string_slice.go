@@ -2,7 +2,7 @@ package helpers
 
 import "sort"
 
-// StringSliceContains :: return whether the string slice contains the given string
+// StringSliceContains returns whether the string slice contains the given string
 func StringSliceContains(slice []string, val string) bool {
 	for _, item := range slice {
 		if item == val {
@@ -12,7 +12,7 @@ func StringSliceContains(slice []string, val string) bool {
 	return false
 }
 
-// StringSliceDiff :: retirn values which only exists in the fist string slice
+// StringSliceDiff returns values which only exists in the fist string slice
 func StringSliceDiff(slice1, slice2 []string) (onlyInSlice1 []string) {
 	onlyInSlice1 = []string{}
 	if len(slice1) == 0 {
@@ -43,13 +43,33 @@ func StringSliceDiff(slice1, slice2 []string) (onlyInSlice1 []string) {
 	return
 }
 
-// RemoveFromStringSlice :: remove the given string from the string slice
+// RemoveFromStringSlice removes the given string from the string slice
 func RemoveFromStringSlice(slice []string, value string) []string {
-	res := []string{}
+	var res []string
 	for _, item := range slice {
 		if item != value {
 			res = append(res, item)
 		}
 	}
 	return res
+}
+
+// StringSliceDistinct returns a slice with the unique elements the input string slice
+func StringSliceDistinct(slice []string) []string {
+	var res []string
+	countMap := make(map[string]int)
+	for _, item := range slice {
+		countMap[item]++
+	}
+	for item, count := range countMap {
+		if count == 1 {
+			res = append(res, item)
+		}
+	}
+	return res
+}
+
+// StringSliceHasDuplicates returns whether a string slice has duplicate elements
+func StringSliceHasDuplicates(slice []string) bool {
+	return len(slice) > len(StringSliceDistinct(slice))
 }
