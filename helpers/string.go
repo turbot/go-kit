@@ -25,17 +25,25 @@ func TabifyStringSlice(strs []string, tab string) []string {
 	return strs
 }
 
-// TruncateString limits the string to the given length, adding an ellipsis if the string is being truncated
+// TruncateString limits the string to the given length, adding an ellipsis if the string is being truncated,
+// also handles newlines
 func TruncateString(str string, length int) string {
 	// NOTE: this function does not handle (i.e. ignore) ansi color codes in strings
-	if PrintableLength(str) <= length {
-		return str
+	newStrings := strings.Split(str, "\n")
+	for i, strnew := range newStrings {
+		if PrintableLength(strnew) <= length {
+			newStrings[i] = strnew
+		}
+		if length <= 1 {
+			return ""
+		}
+		// now limit each printable runes and add an ellipsis
+		if PrintableLength(strnew) > length {
+			newStrings[i] = fmt.Sprintf("%s…", LimitPrintableRunes(strnew, length-1))
+		}
 	}
-	if length <= 1 {
-		return ""
-	}
-	// now limit the printable runes and add an ellipsis
-	return fmt.Sprintf("%s…", LimitPrintableRunes(str, length-1))
+	str = strings.Join(newStrings, "\n")
+	return str
 }
 
 // LimitPrintableRunes limits the string to the given number of runes
