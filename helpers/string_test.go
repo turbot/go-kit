@@ -73,6 +73,11 @@ var testCasesTruncate = map[string]truncateTest{
 		width:    30,
 		expected: "Elastic Compute Cloud (EC2) s…\n While disabled by default.",
 	},
+	"width = 29": {
+		input:    "Elastic\n Compute Cloud (EC2)\n supports encryption\n at rest when using\n the Elastic Block Store\n (EBS) service.\n While disabled by default.",
+		width:    29,
+		expected: "Elastic\n Compute Cloud (EC2)\n supports encryption\n at rest when using\n the Elastic Block Store\n (EBS) service.\n While disabled by default.",
+	},
 }
 
 func TestTruncate(t *testing.T) {
