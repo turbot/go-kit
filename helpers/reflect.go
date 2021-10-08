@@ -10,7 +10,7 @@ import (
 	"github.com/tkrajina/go-reflector/reflector"
 )
 
-// GetFieldValueFromInterface :: use reflection to return the value of the given property path
+// GetFieldValueFromInterface uses reflection to return the value of the given property path
 func GetFieldValueFromInterface(i interface{}, fieldName string) (interface{}, bool) {
 	obj := reflector.New(i)
 	if arrayProperty, index, ok := IsFieldArray(fieldName); ok {
@@ -28,7 +28,7 @@ func GetFieldValueFromInterface(i interface{}, fieldName string) (interface{}, b
 	return val, err == nil
 }
 
-// FieldValueFromInterface :: use reflection to return the value of the given nested property path
+// GetNestedFieldValueFromInterface uses reflection to return the value of the given nested property path
 func GetNestedFieldValueFromInterface(item interface{}, propertyPath string) (interface{}, bool) {
 	var value interface{}
 	var ok bool
@@ -58,7 +58,7 @@ func GetArrayValue(i interface{}, index int) (interface{}, bool) {
 	return nil, false
 }
 
-//  IsZero :: use reflection to determine whether the given value is the zero value of it's type
+// IsZero uses reflection to determine whether the given value is the zero value of it's type
 func IsZero(i interface{}) bool {
 	if i == nil {
 		return true
@@ -77,11 +77,26 @@ func IsZero(i interface{}) bool {
 	}
 }
 
+// IsNil uses reflection to determine whether the given value is nil
+// this is needed as a simple 'val == nil' check does not work for an interface
+// https://mangatmodi.medium.com/go-check-nil-interface-the-right-way-d142776edef1
+func IsNil(i interface{}) bool {
+	if i == nil {
+		return true
+	}
+	switch reflect.TypeOf(i).Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Array, reflect.Chan, reflect.Slice:
+		return reflect.ValueOf(i).IsNil()
+	}
+	return false
+}
+
+// InstantiateType returns a interface representing the zero value for the specified type.
 func InstantiateType(t reflect.Type) interface{} {
 	return reflect.Zero(t).Interface()
 }
 
-// if val is a pointer, dereference it
+// DereferencePointer checks if val is a pointer, and if so, dereferences it
 func DereferencePointer(val interface{}) interface{} {
 	// If the value is a pointer to a non-struct, get its value and use that.
 	reflectVal := reflect.ValueOf(val)
@@ -119,7 +134,7 @@ func IsFieldArray(fieldName string) (string, int, bool) {
 	return arrayName, arrayIndex, err == nil
 }
 
-//  ExecuteMethod :: use reflection to invoke method. We do not support functions which expect parameters.
+// ExecuteMethod use reflection to invoke method. We do not support functions which expect parameters.
 func ExecuteMethod(item interface{}, methodName string) (returnValues []interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
