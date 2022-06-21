@@ -5,6 +5,39 @@ import (
 	"testing"
 )
 
+type stringSliceDistinctTest struct {
+	Name     string
+	Slice    []string
+	Expected []string
+}
+
+var testCasesStringSliceDistinct = []stringSliceDistinctTest{
+	{
+		"no dupes",
+		[]string{"A", "B"},
+		[]string{"A", "B"},
+	},
+	{
+		"single dupe",
+		[]string{"A", "B", "B"},
+		[]string{"A", "B"},
+	},
+	{
+		"multiple dupes",
+		[]string{"A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B"},
+		[]string{"A", "B"},
+	},
+}
+
+func TestStringSliceDistinct(t *testing.T) {
+	for _, test := range testCasesStringSliceDistinct {
+		res := StringSliceDistinct(test.Slice)
+		if !reflect.DeepEqual(res, test.Expected) {
+			t.Errorf(`Test: '%s'' FAILED : expected %v, got %v`, test.Name, test.Expected, res)
+		}
+	}
+}
+
 type stringSliceDiffTest struct {
 	Name                 string
 	Slice1               []string

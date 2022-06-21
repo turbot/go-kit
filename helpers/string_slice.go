@@ -60,9 +60,8 @@ func StringSliceDistinct(slice []string) []string {
 	countMap := make(map[string]int)
 	for _, item := range slice {
 		countMap[item]++
-	}
-	for item, count := range countMap {
-		if count == 1 {
+		// if this is the first time we have come across this item, add to res
+		if countMap[item] == 1 {
 			res = append(res, item)
 		}
 	}
