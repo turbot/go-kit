@@ -5,45 +5,7 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
-	"strings"
-
-	"github.com/tkrajina/go-reflector/reflector"
 )
-
-// GetFieldValueFromInterface uses reflection to return the value of the given property path
-func GetFieldValueFromInterface(i interface{}, fieldName string) (interface{}, bool) {
-	obj := reflector.New(i)
-	if arrayProperty, index, ok := IsFieldArray(fieldName); ok {
-		if arrVal, ok := GetFieldValueFromInterface(i, arrayProperty); ok {
-			return GetArrayValue(arrVal, index)
-		}
-		return nil, false
-	}
-
-	if reflect.TypeOf(i).Kind() == reflect.Map {
-		return obj.GetByKey(fieldName)
-	}
-
-	val, err := obj.Field(fieldName).Get()
-	return val, err == nil
-}
-
-// GetNestedFieldValueFromInterface uses reflection to return the value of the given nested property path
-func GetNestedFieldValueFromInterface(item interface{}, propertyPath string) (interface{}, bool) {
-	var value interface{}
-	var ok bool
-	parent := item
-	var pathSegments = strings.Split(propertyPath, ".")
-	for _, propertyName := range pathSegments {
-		value, ok = GetFieldValueFromInterface(parent, propertyName)
-		if !ok {
-			return nil, false
-		}
-		// update parent for next iteration
-		parent = value
-	}
-	return value, true
-}
 
 func GetArrayValue(i interface{}, index int) (interface{}, bool) {
 	if reflect.TypeOf(i).Kind() != reflect.Slice {

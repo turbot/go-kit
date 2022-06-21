@@ -121,6 +121,11 @@ var testCasesGetNestedFieldValueFromInterface = map[string]GetNestedFieldValueFr
 		fieldName: "Str.S",
 		expected:  "foo S2",
 	},
+	"struct double level string escaped": {
+		input:     s1Instance,
+		fieldName: fmt.Sprintf("%s.%s", EscapePropertyName("Str"), EscapePropertyName("S")),
+		expected:  "foo S2",
+	},
 	"Array property path: Nested multi-dimensional failure": {
 		input:     s1Instance,
 		fieldName: "Str.Arr[0][3]",
@@ -184,6 +189,11 @@ var testCasesGetNestedFieldValueFromInterface = map[string]GetNestedFieldValueFr
 	"struct single level int": {
 		input:     s1Instance,
 		fieldName: "I",
+		expected:  1,
+	},
+	"struct single level int (escaped)": {
+		input:     s1Instance,
+		fieldName: EscapePropertyName("I"),
 		expected:  1,
 	},
 	"struct pointer single level int": {
