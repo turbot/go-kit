@@ -5,33 +5,31 @@ import (
 	"testing"
 )
 
-type stringSliceDistinctTest struct {
+type stringSliceContainsTest struct {
 	Name     string
 	Slice    []string
-	Expected []string
+	Value    string
+	Expected bool
 }
 
-var testCasesStringSliceDistinct = []stringSliceDistinctTest{
+var testCasesStringSliceContains = []stringSliceContainsTest{
 	{
-		"no dupes",
+		"contains",
 		[]string{"A", "B"},
-		[]string{"A", "B"},
+		"A",
+		true,
 	},
 	{
-		"single dupe",
-		[]string{"A", "B", "B"},
+		"does not contains",
 		[]string{"A", "B"},
-	},
-	{
-		"multiple dupes",
-		[]string{"A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B"},
-		[]string{"A", "B"},
+		"Z",
+		false,
 	},
 }
 
-func TestStringSliceDistinct(t *testing.T) {
-	for _, test := range testCasesStringSliceDistinct {
-		res := StringSliceDistinct(test.Slice)
+func TestStringSliceContains(t *testing.T) {
+	for _, test := range testCasesStringSliceContains {
+		res := StringSliceContains(test.Slice, test.Value)
 		if !reflect.DeepEqual(res, test.Expected) {
 			t.Errorf(`Test: '%s'' FAILED : expected %v, got %v`, test.Name, test.Expected, res)
 		}
@@ -130,6 +128,115 @@ func TestStringSliceDiff(t *testing.T) {
 		onlyInSlice1 := StringSliceDiff(test.Slice1, test.Slice2)
 		if !reflect.DeepEqual(test.ExpectedOnlyInSlice1, onlyInSlice1) {
 			t.Errorf(`Test: '%s'' FAILED : onlyInSlice1 expected %v, got %v`, test.Name, test.ExpectedOnlyInSlice1, onlyInSlice1)
+		}
+	}
+}
+
+type removeFromStringSliceTest struct {
+	Name     string
+	Slice1   []string
+	Values   []string
+	Expected []string
+}
+
+var testCasesRemoveFromStringSlice = []removeFromStringSliceTest{
+	{
+		"Single",
+		[]string{"a", "b", "c"},
+		[]string{"a"},
+		[]string{"b", "c"},
+	},
+	{
+		"Multiple",
+		[]string{"a", "b", "c"},
+		[]string{"a", "b"},
+		[]string{"c"},
+	},
+	{
+		"Single not there",
+		[]string{"a", "b", "c"},
+		[]string{"z"},
+		[]string{"a", "b", "c"},
+	},
+	{
+		"Multiple",
+		[]string{"a", "b", "c"},
+		[]string{"z", "g"},
+		[]string{"a", "b", "c"},
+	},
+}
+
+func TestRemoveFromStringSlice(t *testing.T) {
+	for _, test := range testCasesRemoveFromStringSlice {
+		res := RemoveFromStringSlice(test.Slice1, test.Values...)
+		if !reflect.DeepEqual(test.Expected, res) {
+			t.Errorf(`Test: '%s'' FAILED : onlyInSlice1 expected %v, got %v`, test.Name, test.Expected, res)
+		}
+	}
+}
+
+type stringSliceDistinctTest struct {
+	Name     string
+	Slice    []string
+	Expected []string
+}
+
+var testCasesStringSliceDistinct = []stringSliceDistinctTest{
+	{
+		"no dupes",
+		[]string{"A", "B"},
+		[]string{"A", "B"},
+	},
+	{
+		"single dupe",
+		[]string{"A", "B", "B"},
+		[]string{"A", "B"},
+	},
+	{
+		"multiple dupes",
+		[]string{"A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B"},
+		[]string{"A", "B"},
+	},
+}
+
+func TestStringSliceDistinct(t *testing.T) {
+	for _, test := range testCasesStringSliceDistinct {
+		res := StringSliceDistinct(test.Slice)
+		if !reflect.DeepEqual(res, test.Expected) {
+			t.Errorf(`Test: '%s'' FAILED : expected %v, got %v`, test.Name, test.Expected, res)
+		}
+	}
+}
+
+type stringSliceHasDuplicatesTest struct {
+	Name     string
+	Slice    []string
+	Expected bool
+}
+
+var testCasesStringSliceHasDuplicates = []stringSliceHasDuplicatesTest{
+	{
+		"no dupes",
+		[]string{"A", "B"},
+		false,
+	},
+	{
+		"single dupe",
+		[]string{"A", "B", "B"},
+		true,
+	},
+	{
+		"multiple dupes",
+		[]string{"A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B"},
+		true,
+	},
+}
+
+func TestStringSliceHasDuplicates(t *testing.T) {
+	for _, test := range testCasesStringSliceHasDuplicates {
+		res := StringSliceHasDuplicates(test.Slice)
+		if !reflect.DeepEqual(res, test.Expected) {
+			t.Errorf(`Test: '%s'' FAILED : expected %v, got %v`, test.Name, test.Expected, res)
 		}
 	}
 }
