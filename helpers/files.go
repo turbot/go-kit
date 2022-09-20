@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -9,6 +8,7 @@ import (
 )
 
 // Tildefy converts ~ to home directory
+// Deprecated: use files.Tildefy
 func Tildefy(filePath string) (string, error) {
 	if filePath == "~" || strings.HasPrefix(filePath, "~/") {
 		usr, err := user.Current()
@@ -30,19 +30,11 @@ func Tildefy(filePath string) (string, error) {
 }
 
 // FileExists checks if a file exists and is not a directory
+// Deprecated: use files.FileExists
 func FileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
 		return false
 	}
 	return !info.IsDir()
-}
-
-// ToError formats the supplied value as an error (or just returns it if already an error)
-func ToError(val interface{}) error {
-	if e, ok := val.(error); ok {
-		return e
-	} else {
-		return fmt.Errorf("%v", val)
-	}
 }

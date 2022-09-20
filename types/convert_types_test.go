@@ -54,8 +54,6 @@ type numberConversionInput struct {
 	_enum            enumType
 }
 
-//
-//
 var numberConversionInputData = numberConversionInput{
 	int64(100),
 	int32(100),
@@ -138,7 +136,6 @@ var testCasesToString = []numberConversionTest{
 }
 
 func TestToString(t *testing.T) {
-
 	for _, test := range testCasesToString {
 		executeToStringTest(t, test, ToString)
 	}
@@ -220,7 +217,6 @@ func TestIntToString(t *testing.T) {
 	}
 }
 
-//
 var testCasesToBool = []numberConversionTest{
 	{"bool true", numberConversionInputData._bool_true, true},
 	{"bool false", numberConversionInputData._bool_false, false},
