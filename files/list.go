@@ -30,7 +30,8 @@ type ListOptions struct {
 	Exclude []string
 }
 
-// ListFiles :: list files and or folders under list path, based on options
+// ListFiles returns path of files and or folders under listPath
+// inclusions/exclusions/recursion is defined by optds
 func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 	// check folder exists
 	if _, err := os.Stat(listPath); os.IsNotExist(err) {
@@ -50,7 +51,7 @@ func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 	return listFilesFlat(listPath, opts)
 }
 
-// InclusionsFromExtensions :: take a list of file extensions and convert into a .gitgnore format inclusions list
+// InclusionsFromExtensions takes a list of file extensions and convert into a .gitgnore format inclusions list
 func InclusionsFromExtensions(extensions []string) []string {
 	// build include string from extensions
 	var includeStrings []string
@@ -60,7 +61,7 @@ func InclusionsFromExtensions(extensions []string) []string {
 	return includeStrings
 }
 
-// InclusionsFromFiles :: take a list of file names convert into a .gitgnore format inclusions list
+// InclusionsFromFiles takes a list of file names convert into a .gitgnore format inclusions list
 func InclusionsFromFiles(filenames []string) []string {
 	// build include string from extensions
 	var includeStrings []string
@@ -68,6 +69,29 @@ func InclusionsFromFiles(filenames []string) []string {
 		includeStrings = append(includeStrings, fmt.Sprintf("**/%s", extension))
 	}
 	return includeStrings
+}
+
+// ShouldIncludePath returns whether the specified file path satisfies the inclusion and exclusion options
+// (in .gitignore format)
+func ShouldIncludePath(path string, include, exclude []string) bool {
+	// if no include list provided, default to including everything
+	if len(include) == 0 {
+		include = []string{"*"}
+	}
+	// if the entry matches any of the exclude patterns, exclude
+	for _, excludePattern := range exclude {
+		if fnmatch.Match(excludePattern, path, 0) {
+			return false
+		}
+	}
+	// if the entry matches ANY of the include patterns, include
+	shouldInclude := false
+	for _, includePattern := range include {
+		if fnmatch.Match(includePattern, path, 0) {
+			shouldInclude = true
+		}
+	}
+	return shouldInclude
 }
 
 func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
@@ -127,26 +151,4 @@ func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListOptions) bool 
 	}
 
 	return ShouldIncludePath(path, opts.Include, opts.Exclude)
-}
-
-// ShouldIncludePath :: does the specified file path satisfy the inclusion and exclusion options (in .gitignore format)
-func ShouldIncludePath(path string, include, exclude []string) bool {
-	// if no include list provided, default to including everything
-	if len(include) == 0 {
-		include = []string{"*"}
-	}
-	// if the entry matches any of the exclude patterns, exclude
-	for _, excludePattern := range exclude {
-		if fnmatch.Match(excludePattern, path, 0) {
-			return false
-		}
-	}
-	// if the entry matches ANY of the include patterns, include
-	shouldInclude := false
-	for _, includePattern := range include {
-		if fnmatch.Match(includePattern, path, 0) {
-			shouldInclude = true
-		}
-	}
-	return shouldInclude
 }
