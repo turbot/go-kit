@@ -49,11 +49,11 @@ func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 		// if we are not listing files with a path to a file
 		if opts.Flags&Files == 0 {
 			// it's an error
-			return nil, fmt.Errorf("cannot use a path to an existing file without Files ListFlag")
+			return nil, fmt.Errorf("if the path is a file, then you must set the Files ListFlag")
 		}
 		// there should not be an include
 		if len(opts.Include)+len(opts.Exclude) > 0 {
-			return nil, fmt.Errorf("cannot use a path to an existing file with include/exclude")
+			return nil, fmt.Errorf("if the path is a file, then you must not specify include/exclude")
 		}
 		// split up into the parent directory and the file name
 		dir := filepath.Dir(listPath)
