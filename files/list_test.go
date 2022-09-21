@@ -233,23 +233,23 @@ var testCasesListFiles = map[string]ListFilesTest{
 
 var wd, _ = os.Getwd()
 var splitTests = map[string]SplitPathTest{
-	"absolute path": {
+	"$PWD/test_data/list_test1/config/aws.spc": {
 		path:     filepath.Join(wd, "test_data/list_test1/config/aws.spc"),
 		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/aws.spc")},
 	},
-	"only glob": {
+	"**/*.tf": {
 		path:     "**/*.tf",
 		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "**/*.tf")},
 	},
-	"relative path": {
+	"test_data/list_test1/config/*.spc": {
 		path:     "test_data/list_test1/config/*.spc",
 		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/*.spc")},
 	},
-	"./": {
+	"./*.tf": {
 		path:     "./*.tf",
 		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "*.tf")},
 	},
-	"./**/*.tf": {
+	"./terr/**/*.tf": {
 		path:     "./terr/**/*.tf",
 		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "terr/**/*.tf")},
 	},
