@@ -224,11 +224,9 @@ func GlobRoot(glob string) (string, string, error) {
 		return workingDirectory, glob, nil
 	}
 
-	//
 	// if the first segment is a ".",
 	// then replace that with the current
 	// working directory as well
-	//
 	if firstSegment == "." {
 		glob, err = Tildefy(glob)
 		if err != nil {
