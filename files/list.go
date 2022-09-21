@@ -182,38 +182,52 @@ func SplitPath(path string) []string {
 }
 
 // GlobRoot takes in a glob and tries to resolve the prefix of the glob
-// such that the prefix exists in the filesystem
+// such that the prefix exists in the filesystem.
+//
+// If the given glob is relative, then GlobRoot converts it into an absolute path
+// before attempting resolution.
+//
+// If the given glob is can be resolved to an existing file in the system, then
+// the parent directory of the file along with the full path of the file is returned
 func GlobRoot(glob string) (_ string, _ string, e error) {
-	// if the first is * or ** - we prefix WD
+	// we cannot work with an empty input
+	if len(glob) == 0 {
+		return "", "", errors.New("cannot accept empty path")
+	}
+
+	// if the glob exists as a file
+	if FileExists(glob) {
+		// return the absolute path to the
+		absolutePath, _ := Tildefy(glob)
+		// find out the parent directory
+		parentDirectory := filepath.Dir(absolutePath)
+		// return them
+		return parentDirectory, absolutePath, nil
+	}
+
+	// if the first is * or ** - we prefix the working directory
 	// an alternate case is if the first segment CONTAINS a * (e.g: terra*/*.tf)
-	// we would like to prefix with WD, but first, we have to make sure that is not a
+	// we would like to prefix with working directory, but first, we have to make sure that is not a
 	// valid go-getter input
-	splitList := SplitPath(glob)
-	if len(splitList) > 0 && (splitList[0] == "*" || splitList[0] == "**") {
-		wd, err := os.Getwd()
+	firstSegment := SplitPath(glob)[0]
+	if firstSegment == "*" || firstSegment == "**" {
+		workingDirectory, err := os.Getwd()
 		if err != nil {
 			return "", "", err
 		}
-		glob = filepath.Join(wd, glob)
+		glob = filepath.Join(workingDirectory, glob)
+		return workingDirectory, glob, nil
 	}
 
 	// assume that the root is the absolute glob
 	root := glob
 
-	// we cannot work with an empty input
-	if len(glob) == 0 {
-		e = errors.New("cannot accept empty path")
-		return
-	}
-
 	for {
-		// if the `root` has trailing slashes, remove them
-		for strings.HasSuffix(root, "/") {
-			root = strings.TrimSuffix(root, "/")
-		}
+		// clean the path given
+		root = filepath.Clean(root)
 
 		// resolve the ~ ($HOME) and get the root as an absolute path
-		// if an absolute path was given, `Tildefy` does not change the output
+		// if an absolute path was given, Tildefy does not change the output
 		absoluteRoot, err := Tildefy(root)
 		if err != nil {
 			return "", "", err
@@ -226,14 +240,14 @@ func GlobRoot(glob string) (_ string, _ string, e error) {
 			return absoluteRoot, t, nil
 		}
 
-		s := strings.Split(root, string(os.PathSeparator))
-		// does not exist - if we are down to last segment, we failed
-		if len(s) == 1 {
-			// return the original glob
-			return "", glob, nil
-		}
 		// split the path into dir/glob
 		// the root becomes the directory
 		root = filepath.Dir(root)
+
+		// filepath.Dir returns a "." instead of an empty path
+		if root == "." {
+			// return the original glob
+			return "", glob, nil
+		}
 	}
 }
