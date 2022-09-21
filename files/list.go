@@ -211,11 +211,10 @@ func GlobRoot(glob string) (string, string, error) {
 	}
 
 	// if the first contains * or ** - we prefix the working directory
-	// or
-	// if the first segment is a ".",
 	// then replace that with the current working directory
 	// we are (more-or-less) sure that go-getter - the resource fetching library under the hood
 	// does not have any getter which accepts an input with a * in the first path segment
+	// return immediately, since we are sure that the first segment is THE glob
 	firstSegment := SplitPath(glob)[0]
 	if strings.Contains(firstSegment, "*") {
 		glob, err = Tildefy(glob)
@@ -224,6 +223,12 @@ func GlobRoot(glob string) (string, string, error) {
 		}
 		return workingDirectory, glob, nil
 	}
+
+	//
+	// if the first segment is a ".",
+	// then replace that with the current
+	// working directory as well
+	//
 	if firstSegment == "." {
 		glob, err = Tildefy(glob)
 		if err != nil {
