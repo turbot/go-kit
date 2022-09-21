@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/danwakefield/fnmatch"
-	"github.com/turbot/go-kit/helpers"
 )
 
 type ListFlag uint
@@ -45,7 +44,7 @@ func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 	}
 
 	//check if the listPath is the path to a file in the system
-	if helpers.FileExists(listPath) {
+	if FileExists(listPath) {
 		// if we are not listing files with a path to a file
 		if opts.Flags&Files == 0 {
 			// it's an error

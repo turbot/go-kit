@@ -1,10 +1,11 @@
 package helpers
 
 import (
-	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
+
+	"github.com/turbot/go-kit/files"
 )
 
 // Tildefy converts ~ to home directory
@@ -31,10 +32,12 @@ func Tildefy(filePath string) (string, error) {
 
 // FileExists checks if a file exists and is not a directory
 // Deprecated: use files.FileExists
-func FileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
+var FileExists = files.FileExists
+
+// func FileExists(filename string) bool {
+// 	info, err := os.Stat(filename)
+// 	if os.IsNotExist(err) {
+// 		return false
+// 	}
+// 	return !info.IsDir()
+// }
