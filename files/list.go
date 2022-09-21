@@ -201,7 +201,15 @@ func PathToRootAndGlob(path string) (root string, glob string, e error) {
 	}
 
 	for {
-		//
+		// if the `dir` has trailing slashes, remove them
+		for {
+			if !strings.HasSuffix(root, "/") {
+				break
+			}
+			// loose the last character
+			root = root[:len(root)-1]
+		}
+		// if we end up with an empty path, we are done
 		if len(root) == 0 {
 			return root, glob, nil
 		}
@@ -216,15 +224,6 @@ func PathToRootAndGlob(path string) (root string, glob string, e error) {
 		dir, base := filepath.Split(root)
 		// the base gets prepended into globComponents - which we will return later
 		glob = filepath.Join(base, glob)
-
-		// if the `dir` has trailing slashes, remove them
-		for {
-			if !strings.HasSuffix(dir, "/") {
-				break
-			}
-			// loose the last character
-			dir = dir[:len(dir)-1]
-		}
 
 		// the root becomes the directory
 		root = dir

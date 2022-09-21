@@ -237,6 +237,10 @@ var splitTests = map[string]SplitPathTest{
 		path:     filepath.Join(wd, "test_data/list_test1/config/aws.spc"),
 		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config/aws.spc"), glob: ""},
 	},
+	"only glob": {
+		path:     "**/*.tf",
+		expected: SplitPathTestExpected{root: "", glob: "**/*.tf"},
+	},
 }
 
 func TestSplitPath(t *testing.T) {
@@ -252,12 +256,13 @@ func TestSplitPath(t *testing.T) {
 			glob: glob,
 		}
 		expected := test.expected
-		if !reflect.DeepEqual(test, expected) {
-			fmt.Printf("")
+		if !reflect.DeepEqual(expected, actual) {
+			fmt.Printf("%v %v", actual, expected)
 			t.Errorf("Test: '%s'' FAILED : expected:\n\n%s\n\ngot:\n\n%s", name, expected, actual)
 		}
 	}
 }
+
 func TestListFiles(t *testing.T) {
 	for name, test := range testCasesListFiles {
 		listPath, err := filepath.Abs(test.source)
