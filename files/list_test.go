@@ -245,9 +245,13 @@ var splitTests = map[string]SplitPathTest{
 		path:     "test_data/list_test1/config/*.spc",
 		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/*.spc")},
 	},
-	"github.com repository url": {
-		path:     "github.com/turbot/steampipe",
-		expected: SplitPathTestExpected{root: "", glob: "github.com/turbot/steampipe"},
+	"./": {
+		path:     "./*.tf",
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "*.tf")},
+	},
+	"./**/*.tf": {
+		path:     "./terr/**/*.tf",
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "terr/**/*.tf")},
 	},
 }
 

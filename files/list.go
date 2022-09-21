@@ -189,7 +189,7 @@ func SplitPath(path string) []string {
 //
 // If the given glob is can be resolved to an existing file in the system, then
 // the parent directory of the file along with the full path of the file is returned
-func GlobRoot(glob string) (_ string, _ string, e error) {
+func GlobRoot(glob string) (string, string, error) {
 	// we cannot work with an empty input
 	if len(glob) == 0 {
 		return "", "", errors.New("cannot accept empty path")
@@ -205,18 +205,30 @@ func GlobRoot(glob string) (_ string, _ string, e error) {
 		return parentDirectory, absolutePath, nil
 	}
 
-	// if the first is * or ** - we prefix the working directory
-	// an alternate case is if the first segment CONTAINS a * (e.g: terra*/*.tf)
-	// we would like to prefix with working directory, but first, we have to make sure that is not a
-	// valid go-getter input
+	workingDirectory, err := os.Getwd()
+	if err != nil {
+		return "", "", err
+	}
+
+	// if the first contains * or ** - we prefix the working directory
+	// or
+	// if the first segment is a ".",
+	// then replace that with the current working directory
+	// we are (more-or-less) sure that go-getter - the resource fetching library under the hood
+	// does not have any getter which accepts an input with a * in the first path segment
 	firstSegment := SplitPath(glob)[0]
-	if firstSegment == "*" || firstSegment == "**" {
-		workingDirectory, err := os.Getwd()
+	if strings.Contains(firstSegment, "*") {
+		glob, err = Tildefy(glob)
 		if err != nil {
 			return "", "", err
 		}
-		glob = filepath.Join(workingDirectory, glob)
 		return workingDirectory, glob, nil
+	}
+	if firstSegment == "." {
+		glob, err = Tildefy(glob)
+		if err != nil {
+			return "", "", err
+		}
 	}
 
 	// assume that the root is the absolute glob
