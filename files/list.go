@@ -176,12 +176,14 @@ func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListOptions) bool 
 	return ShouldIncludePath(path, opts.Include, opts.Exclude)
 }
 
+// SplitPath splits the given path into segments using the
 func SplitPath(path string) []string {
 	segments := strings.Split(path, string(os.PathSeparator))
 	return segments
 }
 
-// GlobRoot takes in a glob and tries to resolve the root directory
+// GlobRoot takes in a glob and tries to resolve the prefix of the glob
+// such that the prefix exists in the filesystem
 func GlobRoot(glob string) (_ string, _ string, e error) {
 	// if the first is * or ** - we prefix WD
 	// an alternate case is if the first segment CONTAINS a * (e.g: terra*/*.tf)
@@ -199,23 +201,20 @@ func GlobRoot(glob string) (_ string, _ string, e error) {
 	// assume that the root is the absolute glob
 	root := glob
 
+	// we cannot work with an empty input
 	if len(glob) == 0 {
 		e = errors.New("cannot accept empty path")
 		return
 	}
 
 	for {
-		// if the `dir` has trailing slashes, remove them
+		// if the `root` has trailing slashes, remove them
 		for strings.HasSuffix(root, "/") {
 			root = strings.TrimSuffix(root, "/")
 		}
 
-		// // if we end up with an empty path, we are done
-		// // in which case, the original given glob is the whole glob
-		// if len(root) == 0 || root == "." {
-		// 	return "", glob, nil
-		// }
-
+		// resolve the ~ ($HOME) and get the root as an absolute path
+		// if an absolute path was given, `Tildefy` does not change the output
 		absoluteRoot, err := Tildefy(root)
 		if err != nil {
 			return "", "", err
@@ -224,20 +223,18 @@ func GlobRoot(glob string) (_ string, _ string, e error) {
 		// stat the current root
 		if DirectoryExists(absoluteRoot) {
 			// path exists in the file system
-			t, _ := filepath.Abs(glob)
+			t, _ := Tildefy(glob)
 			return absoluteRoot, t, nil
 		}
 
-		// does not exist - if we are down to last segment, we failed
 		s := strings.Split(root, string(os.PathSeparator))
+		// does not exist - if we are down to last segment, we failed
 		if len(s) == 1 {
+			// return the original glob
 			return "", glob, nil
 		}
 		// split the path into dir/glob
 		// the root becomes the directory
 		root = filepath.Dir(root)
-		// resolvedGlob = filepath.Join(base, resolvedGlob)
-
-		// root = dir
 	}
 }
