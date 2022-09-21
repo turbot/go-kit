@@ -176,10 +176,9 @@ func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListOptions) bool 
 	return ShouldIncludePath(path, opts.Include, opts.Exclude)
 }
 
-// SplitPath splits the given path into segments using the
+// SplitPath splits the given path using the os.PathSeparator
 func SplitPath(path string) []string {
-	segments := strings.Split(path, string(os.PathSeparator))
-	return segments
+	return strings.Split(path, string(os.PathSeparator))
 }
 
 // GlobRoot takes in a glob and tries to resolve the prefix of the glob
