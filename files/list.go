@@ -46,6 +46,9 @@ func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 
 	//check if the listPath is the path to a file in the system
 	if helpers.FileExists(listPath) {
+		if opts.Flags&Files != 0 {
+			return nil, fmt.Errorf("cannot use a path to an existing file without Files ListFlag")
+		}
 		// there should not be an include
 		if len(opts.Include)+len(opts.Exclude) > 0 {
 			return nil, fmt.Errorf("cannot use a path to an existing file with include/exclude")
