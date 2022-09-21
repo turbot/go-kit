@@ -235,17 +235,25 @@ var wd, _ = os.Getwd()
 var splitTests = map[string]SplitPathTest{
 	"absolute path": {
 		path:     filepath.Join(wd, "test_data/list_test1/config/aws.spc"),
-		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config/aws.spc"), glob: ""},
+		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/aws.spc")},
 	},
 	"only glob": {
 		path:     "**/*.tf",
-		expected: SplitPathTestExpected{root: "", glob: "**/*.tf"},
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "**/*.tf")},
+	},
+	"relative path": {
+		path:     "test_data/list_test1/config/*.spc",
+		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/*.spc")},
+	},
+	"github.com repository url": {
+		path:     "github.com/turbot/steampipe",
+		expected: SplitPathTestExpected{root: "", glob: "github.com/turbot/steampipe"},
 	},
 }
 
 func TestSplitPath(t *testing.T) {
 	for name, test := range splitTests {
-		root, glob, err := PathToRootAndGlob(test.path)
+		root, glob, err := GlobRoot(test.path)
 
 		if err != nil && !test.expectError {
 			t.Errorf("Test: '%s'' FAILED with unexpected error: %v", name, err)
@@ -257,8 +265,7 @@ func TestSplitPath(t *testing.T) {
 		}
 		expected := test.expected
 		if !reflect.DeepEqual(expected, actual) {
-			fmt.Printf("%v %v", actual, expected)
-			t.Errorf("Test: '%s'' FAILED : expected:\n\n%s\n\ngot:\n\n%s", name, expected, actual)
+			t.Errorf("Test: '%s'' FAILED : expected:\n\n%s\n\ngot:\n\n%s\n\n", name, expected, actual)
 		}
 	}
 }
