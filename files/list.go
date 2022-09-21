@@ -217,7 +217,7 @@ func PathToRootAndGlob(path string) (root string, glob string, e error) {
 		// the base gets prepended into globComponents - which we will return later
 		glob = filepath.Join(base, glob)
 
-		// if the `dir` as a trailing slash, remove it
+		// if the `dir` has trailing slashes, remove them
 		for {
 			if !strings.HasSuffix(dir, "/") {
 				break
