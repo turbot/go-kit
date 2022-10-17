@@ -28,3 +28,12 @@ func CombineErrorsWithPrefix(prefix string, errors ...error) error {
 func CombineErrors(errors ...error) error {
 	return CombineErrorsWithPrefix("", errors...)
 }
+
+// ToError formats the supplied value as an error (or just returns it if already an error)
+func ToError(val interface{}) error {
+	if e, ok := val.(error); ok {
+		return e
+	} else {
+		return fmt.Errorf("%v", val)
+	}
+}

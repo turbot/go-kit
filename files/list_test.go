@@ -13,6 +13,20 @@ type ListFilesTest struct {
 	options  *ListOptions
 	expected interface{}
 }
+type SplitPathTestExpected struct {
+	root string
+	glob string
+}
+
+func (t SplitPathTestExpected) String() string {
+	return fmt.Sprintf("{root: %s ; glob: %s}", t.root, t.glob)
+}
+
+type SplitPathTest struct {
+	path        string
+	expected    SplitPathTestExpected
+	expectError bool
+}
 
 var testCasesListFiles = map[string]ListFilesTest{
 	"AllRecursive, exclude **/a*, **/*.swp, **/.steampipe*": {
@@ -50,7 +64,6 @@ var testCasesListFiles = map[string]ListFilesTest{
 			"test_data/list_test1/a/mod.sp",
 			"test_data/list_test1/a/q1.sp",
 			"test_data/list_test1/a/q2.sp",
-			"test_data/list_test1/a.swp",
 			"test_data/list_test1/b",
 			"test_data/list_test1/b/mod.sp",
 			"test_data/list_test1/b/q1.sp",
@@ -68,7 +81,6 @@ var testCasesListFiles = map[string]ListFilesTest{
 		expected: []string{
 			"test_data/list_test1/.steampipe",
 			"test_data/list_test1/a",
-			"test_data/list_test1/a.swp",
 			"test_data/list_test1/b",
 			"test_data/list_test1/config",
 		},
@@ -78,9 +90,7 @@ var testCasesListFiles = map[string]ListFilesTest{
 		options: &ListOptions{
 			Flags: FilesFlat,
 		},
-		expected: []string{
-			"test_data/list_test1/a.swp",
-		},
+		expected: []string{},
 	},
 	"DirectoriesFlat": {
 		source: "test_data/list_test1",
@@ -136,7 +146,6 @@ var testCasesListFiles = map[string]ListFilesTest{
 			"test_data/list_test1/a/mod.sp",
 			"test_data/list_test1/a/q1.sp",
 			"test_data/list_test1/a/q2.sp",
-			"test_data/list_test1/a.swp",
 			"test_data/list_test1/b/mod.sp",
 			"test_data/list_test1/b/q1.sp",
 			"test_data/list_test1/b/q2.sp",
@@ -154,7 +163,6 @@ var testCasesListFiles = map[string]ListFilesTest{
 			"test_data/list_test1/a/mod.sp",
 			"test_data/list_test1/a/q1.sp",
 			"test_data/list_test1/a/q2.sp",
-			"test_data/list_test1/a.swp",
 			"test_data/list_test1/b/mod.sp",
 			"test_data/list_test1/b/q1.sp",
 			"test_data/list_test1/b/q2.sp",
@@ -178,6 +186,92 @@ var testCasesListFiles = map[string]ListFilesTest{
 			"test_data/list_test1/b/q2.sp",
 		},
 	},
+	"FilesRecursive, include exclude **/github.com/**/mod.sp none": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags:   FilesRecursive,
+			Exclude: []string{},
+			Include: []string{"**/github.com/**/mod.sp"},
+		},
+		expected: []string{
+			"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
+			"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/mod.sp",
+		},
+	},
+	"Selective": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags:   FilesRecursive,
+			Exclude: []string{},
+			Include: []string{"**/github.com/**/mod.sp", "**/test_data/list_test1/a/mod.sp"},
+		},
+		expected: []string{
+			"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
+			"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/mod.sp",
+			"test_data/list_test1/a/mod.sp",
+		},
+	},
+	"Single file with include = expects error": {
+		source: "test_data/list_test1/config/aws.spc",
+		options: &ListOptions{
+			Flags:   FilesRecursive,
+			Exclude: []string{},
+			Include: []string{"*"},
+		},
+		expected: "ERROR",
+	},
+	"Single file without include": {
+		source: "test_data/list_test1/config/aws.spc",
+		options: &ListOptions{
+			Flags:   FilesRecursive,
+			Exclude: []string{},
+			Include: []string{},
+		},
+		expected: "ERROR",
+	},
+}
+
+var wd, _ = os.Getwd()
+var splitTests = map[string]SplitPathTest{
+	"$PWD/test_data/list_test1/config/aws.spc": {
+		path:     filepath.Join(wd, "test_data/list_test1/config/aws.spc"),
+		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/aws.spc")},
+	},
+	"**/*.tf": {
+		path:     "**/*.tf",
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "**/*.tf")},
+	},
+	"test_data/list_test1/config/*.spc": {
+		path:     "test_data/list_test1/config/*.spc",
+		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/*.spc")},
+	},
+	"./*.tf": {
+		path:     "./*.tf",
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "*.tf")},
+	},
+	"./terr/**/*.tf": {
+		path:     "./terr/**/*.tf",
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "terr/**/*.tf")},
+	},
+}
+
+func TestSplitPath(t *testing.T) {
+	for name, test := range splitTests {
+		root, glob, err := GlobRoot(test.path)
+
+		if err != nil && !test.expectError {
+			t.Errorf("Test: '%s'' FAILED with unexpected error: %v", name, err)
+		}
+
+		actual := SplitPathTestExpected{
+			root: root,
+			glob: glob,
+		}
+		expected := test.expected
+		if !reflect.DeepEqual(expected, actual) {
+			t.Errorf("Test: '%s'' FAILED : expected:\n\n%s\n\ngot:\n\n%s\n\n", name, expected, actual)
+		}
+	}
 }
 
 func TestListFiles(t *testing.T) {
@@ -197,7 +291,7 @@ func TestListFiles(t *testing.T) {
 		}
 
 		if test.expected == "ERROR" {
-			t.Errorf("Test: '%s'' FAILED - expected error", name)
+			t.Errorf("Test: '%s'' FAILED - expected error. got %v", name, files)
 			continue
 		}
 
