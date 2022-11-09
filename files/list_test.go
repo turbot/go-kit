@@ -8,11 +8,6 @@ import (
 	"testing"
 )
 
-type ListFilesTest struct {
-	source   string
-	options  *ListOptions
-	expected interface{}
-}
 type SplitPathTestExpected struct {
 	root string
 	glob string
@@ -26,6 +21,56 @@ type SplitPathTest struct {
 	path        string
 	expected    SplitPathTestExpected
 	expectError bool
+}
+
+var wd, _ = os.Getwd()
+
+var splitTests = map[string]SplitPathTest{
+	"$PWD/test_data/list_test1/config/aws.spc": {
+		path:     filepath.Join(wd, "test_data/list_test1/config/aws.spc"),
+		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/aws.spc")},
+	},
+	"**/*.tf": {
+		path:     "**/*.tf",
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "**/*.tf")},
+	},
+	"test_data/list_test1/config/*.spc": {
+		path:     "test_data/list_test1/config/*.spc",
+		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/*.spc")},
+	},
+	"./*.tf": {
+		path:     "./*.tf",
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "*.tf")},
+	},
+	"./terr/**/*.tf": {
+		path:     "./terr/**/*.tf",
+		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "terr/**/*.tf")},
+	},
+}
+
+func TestSplitPath(t *testing.T) {
+	for name, test := range splitTests {
+		root, glob, err := GlobRoot(test.path)
+
+		if err != nil && !test.expectError {
+			t.Errorf("Test: '%s'' FAILED with unexpected error: %v", name, err)
+		}
+
+		actual := SplitPathTestExpected{
+			root: root,
+			glob: glob,
+		}
+		expected := test.expected
+		if !reflect.DeepEqual(expected, actual) {
+			t.Errorf("Test: '%s'' FAILED : expected:\n\n%s\n\ngot:\n\n%s\n\n", name, expected, actual)
+		}
+	}
+}
+
+type ListFilesTest struct {
+	source   string
+	options  *ListOptions
+	expected interface{}
 }
 
 var testCasesListFiles = map[string]ListFilesTest{
@@ -81,6 +126,7 @@ var testCasesListFiles = map[string]ListFilesTest{
 		expected: []string{
 			"test_data/list_test1/.steampipe",
 			"test_data/list_test1/a",
+			"test_data/list_test1/a.swp",
 			"test_data/list_test1/b",
 			"test_data/list_test1/config",
 		},
@@ -90,7 +136,9 @@ var testCasesListFiles = map[string]ListFilesTest{
 		options: &ListOptions{
 			Flags: FilesFlat,
 		},
-		expected: []string{},
+		expected: []string{
+			"test_data/list_test1/a.swp",
+		},
 	},
 	"DirectoriesFlat": {
 		source: "test_data/list_test1",
@@ -211,7 +259,7 @@ var testCasesListFiles = map[string]ListFilesTest{
 			"test_data/list_test1/a/mod.sp",
 		},
 	},
-	"Single file with include = expects error": {
+	"Single file with include - expects error": {
 		source: "test_data/list_test1/config/aws.spc",
 		options: &ListOptions{
 			Flags:   FilesRecursive,
@@ -220,58 +268,6 @@ var testCasesListFiles = map[string]ListFilesTest{
 		},
 		expected: "ERROR",
 	},
-	"Single file without include": {
-		source: "test_data/list_test1/config/aws.spc",
-		options: &ListOptions{
-			Flags:   FilesRecursive,
-			Exclude: []string{},
-			Include: []string{},
-		},
-		expected: "ERROR",
-	},
-}
-
-var wd, _ = os.Getwd()
-var splitTests = map[string]SplitPathTest{
-	"$PWD/test_data/list_test1/config/aws.spc": {
-		path:     filepath.Join(wd, "test_data/list_test1/config/aws.spc"),
-		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/aws.spc")},
-	},
-	"**/*.tf": {
-		path:     "**/*.tf",
-		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "**/*.tf")},
-	},
-	"test_data/list_test1/config/*.spc": {
-		path:     "test_data/list_test1/config/*.spc",
-		expected: SplitPathTestExpected{root: filepath.Join(wd, "test_data/list_test1/config"), glob: filepath.Join(wd, "test_data/list_test1/config/*.spc")},
-	},
-	"./*.tf": {
-		path:     "./*.tf",
-		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "*.tf")},
-	},
-	"./terr/**/*.tf": {
-		path:     "./terr/**/*.tf",
-		expected: SplitPathTestExpected{root: wd, glob: filepath.Join(wd, "terr/**/*.tf")},
-	},
-}
-
-func TestSplitPath(t *testing.T) {
-	for name, test := range splitTests {
-		root, glob, err := GlobRoot(test.path)
-
-		if err != nil && !test.expectError {
-			t.Errorf("Test: '%s'' FAILED with unexpected error: %v", name, err)
-		}
-
-		actual := SplitPathTestExpected{
-			root: root,
-			glob: glob,
-		}
-		expected := test.expected
-		if !reflect.DeepEqual(expected, actual) {
-			t.Errorf("Test: '%s'' FAILED : expected:\n\n%s\n\ngot:\n\n%s\n\n", name, expected, actual)
-		}
-	}
 }
 
 func TestListFiles(t *testing.T) {
@@ -295,7 +291,7 @@ func TestListFiles(t *testing.T) {
 			continue
 		}
 
-		// now remove loacl path from files for expectation testing (as expectations are relative)
+		// now remove local path from files for expectation testing (as expectations are relative)
 		localDirectory, err := os.Getwd()
 		if err != nil {
 			t.Errorf("failed to get working directory %v", err)
