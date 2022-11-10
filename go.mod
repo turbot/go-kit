@@ -10,4 +10,5 @@ require (
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/stretchr/testify v1.6.1
 	github.com/tkrajina/go-reflector v0.5.4
+	github.com/yargevad/filepathx v1.0.0 // indirect
 )
