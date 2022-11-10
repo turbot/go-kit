@@ -62,13 +62,10 @@ func NewWatcher(opts *WatcherOptions) (*FileWatcher, error) {
 		return nil, err
 	}
 
-	var baseExclude []string
 	// create the watcher
 	watcher := &FileWatcher{
 		watch:           watch,
 		directories:     make(map[string]bool),
-		include:         opts.Include,
-		exclude:         append(baseExclude, opts.Exclude...),
 		listFlag:        opts.ListFlag,
 		onChange:        opts.OnChange,
 		onError:         opts.OnError,
@@ -82,6 +79,10 @@ func NewWatcher(opts *WatcherOptions) (*FileWatcher, error) {
 	for _, d := range opts.Directories {
 		watcher.addDirectory(d)
 	}
+
+	// convert the inclusions and exclusions into absolute globs byt joing with each of the directories
+	watcher.include = files.ResolveGlobRoots(opts.Include, opts.Directories...)
+	watcher.exclude = files.ResolveGlobRoots(opts.Exclude, opts.Directories...)
 
 	return watcher, nil
 }

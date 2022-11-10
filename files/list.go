@@ -87,12 +87,11 @@ func InclusionsFromFiles(filenames []string) []string {
 
 // ShouldIncludePath returns whether the specified file path satisfies the inclusion and exclusion options
 // (in .gitignore format)
-func ShouldIncludePath(listPath, filePath string, include, exclude []string) bool {
+// Note: it is expected the pattern will be absolute, i.e including the base path: /tmp/foo/**/*.json
+func ShouldIncludePath(filePath string, include, exclude []string) bool {
 	// if the entry matches any of the exclude patterns, exclude
 	for _, excludePattern := range exclude {
-		// convert the exclude pattern into an absolute
-		absoluteExclude := filepath.Join(listPath, excludePattern)
-		if Match(absoluteExclude, filePath) {
+		if Match(excludePattern, filePath) {
 			return false
 		}
 	}
@@ -103,10 +102,7 @@ func ShouldIncludePath(listPath, filePath string, include, exclude []string) boo
 
 	// if the entry matches ANY of the include patterns, include
 	for _, includePattern := range include {
-		// convert the include pattern into an absolute
-		absoluteInclude := filepath.Join(listPath, includePattern)
-
-		if Match(absoluteInclude, filePath) {
+		if Match(includePattern, filePath) {
 			return true
 		}
 	}
@@ -173,7 +169,25 @@ func shouldIncludeEntry(listPath, filePath string, entry os.FileInfo, opts *List
 		}
 	}
 
-	return ShouldIncludePath(listPath, filePath, opts.Include, opts.Exclude)
+	return ShouldIncludePath(filePath, ResolveGlobRoots(opts.Include, listPath), ResolveGlobRoots(opts.Exclude, listPath))
+}
+
+// ResolveGlobRoots resolve the glob patter for each of the given root paths
+func ResolveGlobRoots(pattern []string, rootPaths ...string) []string {
+	res := make([]string, len(pattern)*len(rootPaths))
+	idx := 0
+	for _, pattern := range pattern {
+		// if the glob is already absolute, skip
+		if strings.HasPrefix(pattern, string(os.PathSeparator)) {
+			res[idx] = pattern
+			continue
+		}
+		for _, rootPath := range rootPaths {
+			res[idx] = filepath.Join(rootPath, pattern)
+			idx++
+		}
+	}
+	return res
 }
 
 // SplitPath splits the given path using the os.PathSeparator
