@@ -3,12 +3,9 @@ package files
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/danwakefield/fnmatch"
 )
 
 type ListFlag uint
@@ -62,11 +59,6 @@ func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 		opts.Include = []string{listPath}
 	}
 
-	// if no include list provided, default to including everything
-	if len(opts.Include) == 0 {
-		opts.Include = []string{"*"}
-	}
-
 	if opts.Flags&Recursive != 0 {
 		return listFilesRecursive(listPath, opts)
 	}
@@ -95,32 +87,32 @@ func InclusionsFromFiles(filenames []string) []string {
 
 // ShouldIncludePath returns whether the specified file path satisfies the inclusion and exclusion options
 // (in .gitignore format)
+// Note: it is expected the pattern will be absolute, i.e including the base path: /tmp/foo/**/*.json
 func ShouldIncludePath(path string, include, exclude []string) bool {
-	// if no include list provided, default to including everything
-	if len(include) == 0 {
-		include = []string{"*"}
-	}
 	// if the entry matches any of the exclude patterns, exclude
 	for _, excludePattern := range exclude {
-		if fnmatch.Match(excludePattern, path, 0) {
+		if Match(excludePattern, path) {
 			return false
 		}
 	}
+	// if no include list provided, default to including everything
+	if len(include) == 0 {
+		return true
+	}
+
 	// if the entry matches ANY of the include patterns, include
-	shouldInclude := false
 	for _, includePattern := range include {
-		if fnmatch.Match(includePattern, path, 0) {
-			// why does this not return?
-			shouldInclude = true
+		if Match(includePattern, path) {
+			return true
 		}
 	}
-	return shouldInclude
+	return false
 }
 
 func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 	var res []string
 	err := filepath.Walk(listPath,
-		func(path string, entry os.FileInfo, err error) error {
+		func(filePath string, entry os.FileInfo, err error) error {
 			if err != nil {
 				if _, ok := err.(*os.PathError); ok {
 					// ignore path errors - this may be for a file which has been removed during the walk
@@ -129,13 +121,13 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 				return err
 			}
 			// ignore list path itself
-			if path == listPath {
+			if filePath == listPath {
 				return nil
 			}
 
 			// should we include this file?
-			if shouldIncludeEntry(path, entry, opts) {
-				res = append(res, path)
+			if shouldIncludeEntry(listPath, filePath, entry, opts) {
+				res = append(res, filePath)
 			}
 
 			return nil
@@ -143,24 +135,28 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 	return res, err
 }
 
-func listFilesFlat(path string, opts *ListOptions) ([]string, error) {
-	entries, err := ioutil.ReadDir(path)
+func listFilesFlat(listPath string, opts *ListOptions) ([]string, error) {
+	entries, err := os.ReadDir(listPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read folder %s: %v", path, err)
+		return nil, fmt.Errorf("failed to read folder %s: %v", listPath, err)
 	}
 
-	matches := []string{}
+	var matches []string
 	for _, entry := range entries {
-		path := filepath.Join(path, entry.Name())
-		if shouldIncludeEntry(path, entry, opts) {
-			matches = append(matches, path)
+		filePath := filepath.Join(listPath, entry.Name())
+		info, err := entry.Info()
+		if err != nil {
+			continue
+		}
+		if shouldIncludeEntry(listPath, filePath, info, opts) {
+			matches = append(matches, filePath)
 		}
 	}
 	return matches, nil
 }
 
 // should the list results include this entry, based on the list options
-func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListOptions) bool {
+func shouldIncludeEntry(listPath, filePath string, entry os.FileInfo, opts *ListOptions) bool {
 	if entry.IsDir() {
 		// if this is a directory and we are not including directories, exclude
 		if opts.Flags&Directories == 0 {
@@ -173,7 +169,25 @@ func shouldIncludeEntry(path string, entry os.FileInfo, opts *ListOptions) bool 
 		}
 	}
 
-	return ShouldIncludePath(path, opts.Include, opts.Exclude)
+	return ShouldIncludePath(filePath, ResolveGlobRoots(opts.Include, listPath), ResolveGlobRoots(opts.Exclude, listPath))
+}
+
+// ResolveGlobRoots resolve the glob patter for each of the given root paths
+func ResolveGlobRoots(pattern []string, rootPaths ...string) []string {
+	res := make([]string, len(pattern)*len(rootPaths))
+	idx := 0
+	for _, pattern := range pattern {
+		// if the glob is already absolute, skip
+		if strings.HasPrefix(pattern, string(os.PathSeparator)) {
+			res[idx] = pattern
+			continue
+		}
+		for _, rootPath := range rootPaths {
+			res[idx] = filepath.Join(rootPath, pattern)
+			idx++
+		}
+	}
+	return res
 }
 
 // SplitPath splits the given path using the os.PathSeparator
