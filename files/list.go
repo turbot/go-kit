@@ -88,10 +88,10 @@ func InclusionsFromFiles(filenames []string) []string {
 // ShouldIncludePath returns whether the specified file path satisfies the inclusion and exclusion options
 // (in .gitignore format)
 // Note: it is expected the pattern will be absolute, i.e including the base path: /tmp/foo/**/*.json
-func ShouldIncludePath(filePath string, include, exclude []string) bool {
+func ShouldIncludePath(path string, include, exclude []string) bool {
 	// if the entry matches any of the exclude patterns, exclude
 	for _, excludePattern := range exclude {
-		if Match(excludePattern, filePath) {
+		if Match(excludePattern, path) {
 			return false
 		}
 	}
@@ -102,7 +102,7 @@ func ShouldIncludePath(filePath string, include, exclude []string) bool {
 
 	// if the entry matches ANY of the include patterns, include
 	for _, includePattern := range include {
-		if Match(includePattern, filePath) {
+		if Match(includePattern, path) {
 			return true
 		}
 	}
