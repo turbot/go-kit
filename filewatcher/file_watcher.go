@@ -94,6 +94,16 @@ func (w *FileWatcher) Close() {
 	w.closeChan <- true
 }
 
+func (w *FileWatcher) scheduleCreateEvents(paths []string) {
+	for _, path := range paths {
+		// raise a create event for this file
+		w.scheduleHandler(fsnotify.Event{
+			Name: path,
+			Op:   fsnotify.Create,
+		})
+	}
+}
+
 func (w *FileWatcher) Start() {
 	// make an initial call to addWatches to add watches on existing files matching our criteria
 	w.addWatches()
@@ -104,7 +114,10 @@ func (w *FileWatcher) Start() {
 			select {
 			case <-time.After(w.pollInterval):
 				// every poll interval, enumerate files to watch in all watched folders and add watches for any new files
-				w.addWatches()
+				watchesAdded := w.addWatches()
+
+				// raise CREATE events for all watches added
+				w.scheduleCreateEvents(watchesAdded)
 
 			case ev := <-w.watch.Events:
 				err := w.handleEvent(ev)
@@ -131,7 +144,10 @@ func (w *FileWatcher) Start() {
 
 }
 
-func (w *FileWatcher) addWatches() {
+// addWatches recurses through the directory trees and adds watches to all
+// files which are not being watched yet.
+// returns a list of paths that it started a watch on
+func (w *FileWatcher) addWatches() []string {
 	w.dirLock.Lock()
 	defer w.dirLock.Unlock()
 	// enumerate all files meeting inclusions and exclusions in each watched directory and add a watch
@@ -141,6 +157,7 @@ func (w *FileWatcher) addWatches() {
 		Include: w.include,
 	}
 	var errors []error
+	var watchesStarted []string
 	for directory := range w.directories {
 		sourcePaths, err := files.ListFiles(directory, opts)
 		if err != nil {
@@ -152,6 +169,8 @@ func (w *FileWatcher) addWatches() {
 			if !w.watches[p] {
 				if err := w.addWatch(p); err != nil {
 					errors = append(errors, err)
+				} else {
+					watchesStarted = append(watchesStarted, p)
 				}
 			}
 		}
@@ -163,15 +182,11 @@ func (w *FileWatcher) addWatches() {
 			log.Printf("[TRACE] error occurred setting watches: %v", err)
 		}
 	}
+
+	return watchesStarted
 }
 
 func (w *FileWatcher) addWatch(path string) error {
-	// raise a create event for this file
-	w.scheduleHandler(fsnotify.Event{
-		Name: path,
-		Op:   fsnotify.Create,
-	})
-
 	// add the watch
 	if err := w.watch.Add(path); err != nil {
 		return err
