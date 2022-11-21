@@ -39,7 +39,8 @@ type FileWatcher struct {
 	// when did the handler last run
 	lastHandlerTime time.Time
 	// events to be handled at the next handler execution
-	events []fsnotify.Event
+	events    []fsnotify.Event
+	eventMask fsnotify.Op
 }
 
 type WatcherOptions struct {
@@ -49,11 +50,18 @@ type WatcherOptions struct {
 	OnChange    func([]fsnotify.Event)
 	OnError     func(error)
 	ListFlag    files.ListFlag
+	// a bit mask of the events that you are interested in
+	// e.g: fsnotify.CREATE | fsnotify.REMOVE
+	// if no mask is set, all events are published
+	EventMask fsnotify.Op
 }
 
 func NewWatcher(opts *WatcherOptions) (*FileWatcher, error) {
 	if len(opts.Directories) == 0 {
 		return nil, fmt.Errorf("WatcherOptions must include at least one directory")
+	}
+	if opts.EventMask == 0 {
+		opts.EventMask = fsnotify.Chmod | fsnotify.Create | fsnotify.Remove | fsnotify.Rename | fsnotify.Write
 	}
 
 	// Create an fsnotify watcher object
@@ -73,6 +81,7 @@ func NewWatcher(opts *WatcherOptions) (*FileWatcher, error) {
 		pollInterval:    4 * time.Second,
 		watches:         make(map[string]bool),
 		lastHandlerTime: time.Now(),
+		eventMask:       opts.EventMask,
 	}
 
 	// we store directories as a map to simplify removing and checking for dupes
@@ -303,6 +312,12 @@ func (w *FileWatcher) recursive() bool {
 func (w *FileWatcher) scheduleHandler(ev fsnotify.Event) {
 	w.handlerLock.Lock()
 	defer w.handlerLock.Unlock()
+
+	if ev.Op&w.eventMask != ev.Op {
+		// this is not an event that we are interested in
+		return
+	}
+
 	// we can tell if a handler is scheduled by looking at the events array
 	handlerScheduled := len(w.events) > 0
 	// now add our event to the array
