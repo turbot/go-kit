@@ -1,6 +1,7 @@
 ## v0.5.0 [tbd]
 _What's new?_
-* Add file watcher.  ([#26](https://github.com/turbot/go-kit/issues/26))
+* Add file watcher. ([#26](https://github.com/turbot/go-kit/issues/26))
+* Adds helper functions for strings and hashes. ([#29](https://github.com/turbot/go-kit/issues/29))
 * Add DirectoryExists.
 * Add GlobRoot.
 * Add SplitPath.
