@@ -176,14 +176,15 @@ func shouldIncludeEntry(listPath, filePath string, entry os.FileInfo, opts *List
 func ResolveGlobRoots(pattern []string, rootPaths ...string) []string {
 	res := make([]string, len(pattern)*len(rootPaths))
 	idx := 0
-	for _, pattern := range pattern {
+	for _, p := range pattern {
 		// if the glob is already absolute, skip
-		if strings.HasPrefix(pattern, string(os.PathSeparator)) {
-			res[idx] = pattern
+		if strings.HasPrefix(p, string(os.PathSeparator)) {
+			res[idx] = p
+			idx++
 			continue
 		}
 		for _, rootPath := range rootPaths {
-			res[idx] = filepath.Join(rootPath, pattern)
+			res[idx] = filepath.Join(rootPath, p)
 			idx++
 		}
 	}
