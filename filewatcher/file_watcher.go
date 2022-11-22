@@ -61,7 +61,8 @@ func NewWatcher(opts *WatcherOptions) (*FileWatcher, error) {
 		return nil, fmt.Errorf("WatcherOptions must include at least one directory")
 	}
 	if opts.EventMask == 0 {
-		opts.EventMask = fsnotify.Chmod | fsnotify.Create | fsnotify.Remove | fsnotify.Rename | fsnotify.Write
+		// no mask was sent - we will publish for all events
+		opts.EventMask = fsnotify.Create | fsnotify.Write | fsnotify.Remove | fsnotify.Rename | fsnotify.Chmod
 	}
 
 	// Create an fsnotify watcher object
