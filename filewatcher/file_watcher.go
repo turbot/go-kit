@@ -39,7 +39,8 @@ type FileWatcher struct {
 	// when did the handler last run
 	lastHandlerTime time.Time
 	// events to be handled at the next handler execution
-	events []fsnotify.Event
+	events    []fsnotify.Event
+	eventMask fsnotify.Op
 }
 
 type WatcherOptions struct {
@@ -49,11 +50,19 @@ type WatcherOptions struct {
 	OnChange    func([]fsnotify.Event)
 	OnError     func(error)
 	ListFlag    files.ListFlag
+	// a bit mask of the events that you are interested in
+	// e.g: fsnotify.CREATE | fsnotify.REMOVE
+	// if no mask is set, all events are published
+	EventMask fsnotify.Op
 }
 
 func NewWatcher(opts *WatcherOptions) (*FileWatcher, error) {
 	if len(opts.Directories) == 0 {
 		return nil, fmt.Errorf("WatcherOptions must include at least one directory")
+	}
+	if opts.EventMask == 0 {
+		// no mask was sent - we will publish for all events
+		opts.EventMask = fsnotify.Create | fsnotify.Write | fsnotify.Remove | fsnotify.Rename | fsnotify.Chmod
 	}
 
 	// Create an fsnotify watcher object
@@ -73,6 +82,7 @@ func NewWatcher(opts *WatcherOptions) (*FileWatcher, error) {
 		pollInterval:    4 * time.Second,
 		watches:         make(map[string]bool),
 		lastHandlerTime: time.Now(),
+		eventMask:       opts.EventMask,
 	}
 
 	// we store directories as a map to simplify removing and checking for dupes
@@ -94,6 +104,16 @@ func (w *FileWatcher) Close() {
 	w.closeChan <- true
 }
 
+func (w *FileWatcher) scheduleCreateEvents(paths []string) {
+	for _, path := range paths {
+		// raise a create event for this file
+		w.scheduleHandler(fsnotify.Event{
+			Name: path,
+			Op:   fsnotify.Create,
+		})
+	}
+}
+
 func (w *FileWatcher) Start() {
 	// make an initial call to addWatches to add watches on existing files matching our criteria
 	w.addWatches()
@@ -104,7 +124,11 @@ func (w *FileWatcher) Start() {
 			select {
 			case <-time.After(w.pollInterval):
 				// every poll interval, enumerate files to watch in all watched folders and add watches for any new files
-				w.addWatches()
+				newWatchPaths := w.addWatches()
+
+				// fsnotify does not raise CREATE events for new files.
+				// we need raise the CREATE events for all watch paths added
+				w.scheduleCreateEvents(newWatchPaths)
 
 			case ev := <-w.watch.Events:
 				err := w.handleEvent(ev)
@@ -131,7 +155,10 @@ func (w *FileWatcher) Start() {
 
 }
 
-func (w *FileWatcher) addWatches() {
+// addWatches recurses through the directory trees and adds watches to all
+// files which are not being watched yet.
+// returns a list of paths that it started a watch on
+func (w *FileWatcher) addWatches() []string {
 	w.dirLock.Lock()
 	defer w.dirLock.Unlock()
 	// enumerate all files meeting inclusions and exclusions in each watched directory and add a watch
@@ -141,6 +168,7 @@ func (w *FileWatcher) addWatches() {
 		Include: w.include,
 	}
 	var errors []error
+	var newWatchPaths []string
 	for directory := range w.directories {
 		sourcePaths, err := files.ListFiles(directory, opts)
 		if err != nil {
@@ -152,6 +180,8 @@ func (w *FileWatcher) addWatches() {
 			if !w.watches[p] {
 				if err := w.addWatch(p); err != nil {
 					errors = append(errors, err)
+				} else {
+					newWatchPaths = append(newWatchPaths, p)
 				}
 			}
 		}
@@ -163,15 +193,11 @@ func (w *FileWatcher) addWatches() {
 			log.Printf("[TRACE] error occurred setting watches: %v", err)
 		}
 	}
+
+	return newWatchPaths
 }
 
 func (w *FileWatcher) addWatch(path string) error {
-	// raise a create event for this file
-	w.scheduleHandler(fsnotify.Event{
-		Name: path,
-		Op:   fsnotify.Create,
-	})
-
 	// add the watch
 	if err := w.watch.Add(path); err != nil {
 		return err
@@ -288,6 +314,12 @@ func (w *FileWatcher) recursive() bool {
 func (w *FileWatcher) scheduleHandler(ev fsnotify.Event) {
 	w.handlerLock.Lock()
 	defer w.handlerLock.Unlock()
+
+	if ev.Op&w.eventMask == 0 {
+		// this is not an event that we are interested in
+		return
+	}
+
 	// we can tell if a handler is scheduled by looking at the events array
 	handlerScheduled := len(w.events) > 0
 	// now add our event to the array
