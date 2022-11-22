@@ -314,7 +314,7 @@ func (w *FileWatcher) scheduleHandler(ev fsnotify.Event) {
 	w.handlerLock.Lock()
 	defer w.handlerLock.Unlock()
 
-	if ev.Op&w.eventMask != ev.Op {
+	if ev.Op&w.eventMask == 0 {
 		// this is not an event that we are interested in
 		return
 	}
