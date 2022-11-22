@@ -224,7 +224,7 @@ var testCasesListFiles = map[string]listFilesTest{
 		source: "test_data/list_test1",
 		options: &ListOptions{
 			Flags:   FilesRecursive,
-			Exclude: []string{"/.steampipe/**"},
+			Exclude: []string{".steampipe/**", ".steampipe/**/*"},
 		},
 		expected: []string{
 			"test_data/list_test1/a.swp",
