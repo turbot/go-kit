@@ -123,10 +123,11 @@ func (w *FileWatcher) Start() {
 			select {
 			case <-time.After(w.pollInterval):
 				// every poll interval, enumerate files to watch in all watched folders and add watches for any new files
-				watchesAdded := w.addWatches()
+				newWatchPaths := w.addWatches()
 
-				// raise CREATE events for all watches added
-				w.scheduleCreateEvents(watchesAdded)
+				// fsnotify does not raise CREATE events for new files.
+				// we need raise the CREATE events for all watch paths added
+				w.scheduleCreateEvents(newWatchPaths)
 
 			case ev := <-w.watch.Events:
 				err := w.handleEvent(ev)
@@ -166,7 +167,7 @@ func (w *FileWatcher) addWatches() []string {
 		Include: w.include,
 	}
 	var errors []error
-	var watchesStarted []string
+	var newWatchPaths []string
 	for directory := range w.directories {
 		sourcePaths, err := files.ListFiles(directory, opts)
 		if err != nil {
@@ -179,7 +180,7 @@ func (w *FileWatcher) addWatches() []string {
 				if err := w.addWatch(p); err != nil {
 					errors = append(errors, err)
 				} else {
-					watchesStarted = append(watchesStarted, p)
+					newWatchPaths = append(newWatchPaths, p)
 				}
 			}
 		}
@@ -192,7 +193,7 @@ func (w *FileWatcher) addWatches() []string {
 		}
 	}
 
-	return watchesStarted
+	return newWatchPaths
 }
 
 func (w *FileWatcher) addWatch(path string) error {
