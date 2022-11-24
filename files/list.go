@@ -179,7 +179,7 @@ func ResolveGlobRoots(pattern []string, rootPaths ...string) []string {
 	// underlying array
 	res := make([]string, 0, len(pattern)*len(rootPaths))
 	for _, p := range pattern {
-		// if the glob is already absolute, skip
+		// if the glob is already absolute, add it and continue
 		if strings.HasPrefix(p, string(os.PathSeparator)) {
 			res = append(res, p)
 			continue

@@ -9,6 +9,55 @@ import (
 	"testing"
 )
 
+type resolveGlobRootTest struct {
+	patterns  []string
+	rootPaths []string
+	expected  interface{}
+}
+
+var resolveGlobRootTests = map[string]resolveGlobRootTest{
+	"all absolute": {
+		patterns:  []string{"/an/absolute/pattern"},
+		rootPaths: []string{"/an/absolute/root"},
+		expected:  []string{"/an/absolute/pattern"},
+	},
+	"multiple absolute patterns": {
+		patterns:  []string{"/an/absolute/pattern", "/another/absolute/pattern"},
+		rootPaths: []string{"/an/absolute/root"},
+		expected:  []string{"/an/absolute/pattern", "/another/absolute/pattern"},
+	},
+	"absolute and relative patterns": {
+		patterns:  []string{"/an/absolute/pattern", "a/relative/pattern"},
+		rootPaths: []string{"/an/absolute/root"},
+		expected:  []string{"/an/absolute/pattern", "/an/absolute/root/a/relative/pattern"},
+	},
+	"relative patterns": {
+		patterns:  []string{"a/relative/pattern", "another/relative/pattern"},
+		rootPaths: []string{"/an/absolute/root"},
+		expected:  []string{"/an/absolute/root/a/relative/pattern", "/an/absolute/root/another/relative/pattern"},
+	},
+	"relative patterns, multiple roots": {
+		patterns:  []string{"a/relative/pattern", "another/relative/pattern"},
+		rootPaths: []string{"/an/absolute/root", "/another/absolute/root"},
+		expected:  []string{"/an/absolute/root/a/relative/pattern", "/another/absolute/root/a/relative/pattern", "/an/absolute/root/another/relative/pattern", "/another/absolute/root/another/relative/pattern"},
+	},
+	"absolute and relative patterns, multiple roots": {
+		patterns:  []string{"/an/absolute/pattern", "a/relative/pattern"},
+		rootPaths: []string{"/an/absolute/root", "/another/absolute/root"},
+		expected:  []string{"/an/absolute/pattern", "/an/absolute/root/a/relative/pattern", "/another/absolute/root/a/relative/pattern"},
+	},
+}
+
+func TestResolveGlobRoots(t *testing.T) {
+	for name, test := range resolveGlobRootTests {
+		actual := ResolveGlobRoots(test.patterns, test.rootPaths...)
+		expected := test.expected
+		if !reflect.DeepEqual(expected, actual) {
+			t.Errorf("Test: '%s'' FAILED : expected:\n\n%s\n\ngot:\n\n%s\n\n", name, expected, actual)
+		}
+	}
+}
+
 type globRootTestExpected struct {
 	root string
 	glob string
