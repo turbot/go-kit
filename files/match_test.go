@@ -1,6 +1,9 @@
 package files
 
-import "testing"
+import (
+	"github.com/turbot/go-kit/helpers"
+	"testing"
+)
 
 type matchTestCase struct {
 	pattern  string
@@ -99,10 +102,29 @@ var matchTests = map[string]matchTestCase{
 		file:     "b/c/bar.spc",
 		expected: false,
 	},
+	"everything in a hidden folder (fails)": {
+		pattern:  "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/.*/**",
+		file:     "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/dashboard.sp",
+		expected: false,
+	},
+	"all child folder sp files (fails)": {
+		pattern:  "testdata/mods/single_mod_one_query/**/*.sp",
+		file:     "testdata/mods/single_mod_one_query/query.sp",
+		expected: false,
+	},
+	"all child folder sp files with wildcard in path": {
+		pattern:  "testdata/m*/**/*.sp",
+		file:     "testdata/mods/single_mod_one_query/query.sp",
+		expected: true,
+	},
 }
 
 func TestMatch(t *testing.T) {
+	var testNames = []string{"all child folder sp files (fails)", "all child folder sp files with wildcard in path"}
 	for name, test := range matchTests {
+		if len(testNames) > 0 && !helpers.StringSliceContains(testNames, name) {
+			continue
+		}
 		actual := Match(test.pattern, test.file)
 
 		if actual != test.expected {

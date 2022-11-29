@@ -87,7 +87,7 @@ func evalLeadingDblAsterisk(pattern string, value string) bool {
 	patternLen := len(patternParts)
 	valueLen := len(valueParts)
 	for i := 1; i <= patternLen; i++ {
-		// idf we have run out of value parts, fail
+		// if we have run out of value parts, fail
 		if i > valueLen {
 			return false
 		}
@@ -112,7 +112,7 @@ func evalTrailingDblAsterisk(pattern string, value string) bool {
 	// just check each part of the path matches
 	// work back through the pattern and the value - each segment must match
 	trimmedPattern := strings.TrimSuffix(pattern, suffix)
-	trimmedValue := strings.TrimSuffix(pattern, string(os.PathSeparator))
+	trimmedValue := strings.TrimSuffix(value, string(os.PathSeparator))
 
 	patternParts := strings.Split(trimmedPattern, string(os.PathSeparator))
 	valueParts := strings.Split(trimmedValue, string(os.PathSeparator))
