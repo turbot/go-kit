@@ -49,10 +49,55 @@ var matchTests = map[string]matchTestCase{
 		file:     "a/b/c/bar.spc",
 		expected: true,
 	},
-	"wildcard recursive dir, wildcard filename with defined parents, deeply nested file - match": {
-		pattern:  "a/**/c/*.spc",
+	"all hidden folders": {
+		pattern:  "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/.*",
+		file:     "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/.steampipe",
+		expected: true,
+	},
+	"all nested hidden folders": {
+		pattern:  "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/**/.*",
+		file:     "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/foo/.steampipe",
+		expected: true,
+	},
+	"all nested hidden folders 2": {
+		pattern:  "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/**/.*",
+		file:     "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/foo/bar/.steampipe",
+		expected: true,
+	},
+	"all nested hidden folders under a specific path": {
+		pattern:  "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/**/a/.*",
+		file:     "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/foo/bar/a/.steampipe",
+		expected: true,
+	},
+	"all nested hidden folders under a specific path (fails)": {
+		pattern:  "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/**/a/.*",
+		file:     "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/foo/bar/a/.steampipe",
+		expected: true,
+	},
+	"everything in a hidden folder": {
+		pattern:  "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/.*/**",
+		file:     "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/.steampipe/mods/github.com/pskrbasu/steampipe-mod-m1@v4.0/dashboard.sp",
+		expected: true,
+	},
+	"a recursive wildcard": {
+		pattern:  "**/*.spc",
 		file:     "a/b/c/bar.spc",
 		expected: true,
+	},
+	"a recursive wildcard under a specific path": {
+		pattern:  "**/a/b/c/*.spc",
+		file:     "foo/a/b/c/bar.spc",
+		expected: true,
+	},
+	"a recursive wildcard under a specific path (fails)": {
+		pattern:  "**/a/b/c/*.spc",
+		file:     "foo/a/b/bar.spc",
+		expected: false,
+	},
+	"a recursive wildcard under a specific path (fails 2)": {
+		pattern:  "**/a/b/c/*.spc",
+		file:     "b/c/bar.spc",
+		expected: false,
 	},
 }
 

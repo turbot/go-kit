@@ -70,7 +70,7 @@ func InclusionsFromExtensions(extensions []string) []string {
 	// build include string from extensions
 	var includeStrings []string
 	for _, extension := range extensions {
-		includeStrings = append(includeStrings, fmt.Sprintf("**/*%s", extension))
+		includeStrings = append(includeStrings, fmt.Sprintf("*%s", extension), fmt.Sprintf("**/*%s", extension))
 	}
 	return includeStrings
 }
