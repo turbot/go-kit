@@ -37,18 +37,19 @@ func evalDblAsterisk(pattern, value string) bool {
 	// A slash followed by two consecutive asterisks then a slash matches
 	// zero or more directories. For example, "a/**/b" matches "a/b",
 	// /"a/x/b", "a/x/y/b" and so on.
-	parts := strings.Split(pattern, dblAsterisks)
-	for i, part := range parts {
+	patternParts := strings.Split(pattern, dblAsterisks)
+	for i, patternPart := range patternParts {
 		switch i {
 		case 0:
-			if !strings.HasPrefix(value, part) {
+			patternPart = strings.TrimSuffix(patternPart, string(os.PathSeparator))
+			if !prefixMatches(patternPart, value) {
 				return false
 			}
-		case len(parts) - 1: // last part
-			part = strings.TrimPrefix(part, string(os.PathSeparator))
+		case len(patternParts) - 1: // last part
+			patternPart = strings.TrimPrefix(patternPart, string(os.PathSeparator))
 
 			// if the pattern part has no directories, tri value of directory
-			partSegments := strings.Split(part, string(os.PathSeparator))
+			partSegments := strings.Split(patternPart, string(os.PathSeparator))
 			if len(partSegments) == 1 {
 				value = filepath.Base(value)
 			} else {
@@ -60,15 +61,15 @@ func evalDblAsterisk(pattern, value string) bool {
 				}
 			}
 
-			return fnmatch.Match(part, value, fnmatch.FNM_PATHNAME)
+			return fnmatch.Match(patternPart, value, fnmatch.FNM_PATHNAME)
 		default:
-			if !strings.Contains(value, part) {
+			if !strings.Contains(value, patternPart) {
 				return false
 			}
 		}
 
 		// trim evaluated text
-		index := strings.Index(value, part) + len(part)
+		index := strings.Index(value, patternPart) + len(patternPart)
 		value = value[index:]
 	}
 
@@ -82,6 +83,10 @@ func evalLeadingDblAsterisk(pattern string, value string) bool {
 	// work back through the pattern and the value - each segment must match
 	trimmedPattern := strings.TrimPrefix(pattern, prefix)
 	trimmedValue := strings.TrimPrefix(value, string(os.PathSeparator))
+	return suffixMatches(trimmedPattern, trimmedValue)
+}
+
+func suffixMatches(trimmedPattern string, trimmedValue string) bool {
 	patternParts := strings.Split(trimmedPattern, string(os.PathSeparator))
 	valueParts := strings.Split(trimmedValue, string(os.PathSeparator))
 	patternLen := len(patternParts)
@@ -114,6 +119,10 @@ func evalTrailingDblAsterisk(pattern string, value string) bool {
 	trimmedPattern := strings.TrimSuffix(pattern, suffix)
 	trimmedValue := strings.TrimSuffix(value, string(os.PathSeparator))
 
+	return prefixMatches(trimmedPattern, trimmedValue)
+}
+
+func prefixMatches(trimmedPattern string, trimmedValue string) bool {
 	patternParts := strings.Split(trimmedPattern, string(os.PathSeparator))
 	valueParts := strings.Split(trimmedValue, string(os.PathSeparator))
 	patternLen := len(patternParts)

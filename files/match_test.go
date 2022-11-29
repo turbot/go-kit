@@ -120,7 +120,7 @@ var matchTests = map[string]matchTestCase{
 }
 
 func TestMatch(t *testing.T) {
-	var testNames = []string{"all child folder sp files (fails)", "all child folder sp files with wildcard in path"}
+	var testNames = []string{}
 	for name, test := range matchTests {
 		if len(testNames) > 0 && !helpers.StringSliceContains(testNames, name) {
 			continue
