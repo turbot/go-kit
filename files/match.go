@@ -128,7 +128,7 @@ func prefixMatches(trimmedPattern string, trimmedValue string) bool {
 	patternLen := len(patternParts)
 	valueLen := len(valueParts)
 	for i := 0; i < patternLen; i++ {
-		// idf we have run out of value parts, fail
+		// if we have run out of value parts, fail
 		if i >= valueLen {
 			return false
 		}
