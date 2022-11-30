@@ -107,10 +107,13 @@ var matchTests = map[string]matchTestCase{
 		file:     "/Users/kai/Dev/github/turbot/steampipe/pkg/workspace/test_data/dependent_mod/dashboard.sp",
 		expected: false,
 	},
-	"all child folder sp files (fails)": {
+	// NOTE: when globbing on command line this would fail
+	// however according to https://metacpan.org/dist/File-Globstar/view/lib/File/Globstar.pod#**
+	// this _should_ include files at top level
+	"all child folder sp files - top level file": {
 		pattern:  "testdata/mods/single_mod_one_query/**/*.sp",
 		file:     "testdata/mods/single_mod_one_query/query.sp",
-		expected: false,
+		expected: true,
 	},
 	"all child folder sp files with wildcard in path": {
 		pattern:  "testdata/m*/**/*.sp",
