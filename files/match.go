@@ -48,7 +48,7 @@ func evalDblAsterisk(pattern, value string) bool {
 		case len(patternParts) - 1: // last part
 			patternPart = strings.TrimPrefix(patternPart, string(os.PathSeparator))
 
-			// if the pattern part has no directories, tri value of directory
+			// if the pattern part has no directories, trim value of directory
 			partSegments := strings.Split(patternPart, string(os.PathSeparator))
 			if len(partSegments) == 1 {
 				value = filepath.Base(value)
