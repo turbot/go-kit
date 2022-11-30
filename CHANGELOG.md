@@ -1,4 +1,4 @@
-## v0.5.0 [tbd]
+## v0.5.0 [2022-11-30]
 _What's new?_
 * Add file watcher. ([#26](https://github.com/turbot/go-kit/issues/26))
 * Adds helper functions for strings and hashes. ([#29](https://github.com/turbot/go-kit/issues/29))
@@ -27,7 +27,6 @@ _What's new?_
 
 ## v0.2.1 [2021-05-14]
 * Fix length bug in `TruncateString`.
-
 
 ## v0.2.0 [2021-05-13]
 _What's new?_
