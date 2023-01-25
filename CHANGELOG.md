@@ -1,3 +1,7 @@
+## v0.6.0 [tbd]
+_What's new?_
+* Add `UpgradeRWMutex`. ([#42](https://github.com/turbot/go-kit/issues/42))
+
 ## v0.5.0 [2022-11-30]
 _What's new?_
 * Add file watcher. ([#26](https://github.com/turbot/go-kit/issues/26))
