@@ -3,6 +3,7 @@ package files
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -28,10 +29,12 @@ type ListOptions struct {
 	// .gitignore (fnmatch) format patterns for file inclusions and exclusions
 	Include []string
 	Exclude []string
+	// max results
+	MaxResults int
 }
 
 // ListFiles returns path of files and or folders under listPath
-// inclusions/exclusions/recursion is defined by optds
+// inclusions/exclusions/recursion is defined by opts
 func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 	// check folder exists
 	if _, err := os.Stat(listPath); os.IsNotExist(err) {
@@ -112,8 +115,10 @@ func ShouldIncludePath(path string, include, exclude []string) bool {
 
 func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 	var res []string
+	count := 0 // initialize a counter to keep track of the number of files returned
 	err := filepath.WalkDir(listPath,
 		func(filePath string, entry fs.DirEntry, err error) error {
+
 			if err != nil {
 				if _, ok := err.(*os.PathError); ok {
 					// ignore path errors - this may be for a file which has been removed during the walk
@@ -132,12 +137,24 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 			// should we include this file?
 			if shouldIncludeEntry(listPath, filePath, entry, opts) {
 				res = append(res, filePath)
+				count++ // increment the counter
+				// check the number of files reached, if MaxResults is reached,
+				// stop walking the directory
+				if opts.MaxResults > 0 {
+					if count == opts.MaxResults {
+						// TODO: go 1.20 has a fs.SkipAll error which we can use
+						return io.EOF
+					}
+				}
 			} else if entry.IsDir() && !shouldSearchInDir(listPath, filePath, opts) {
 				return fs.SkipDir
 			}
 
 			return nil
 		})
+	if err == io.EOF {
+		err = nil
+	}
 	return res, err
 }
 
