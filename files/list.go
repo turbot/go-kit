@@ -149,6 +149,13 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 			} else if entry.IsDir() && !shouldSearchInDir(listPath, filePath, opts) {
 				return fs.SkipDir
 			}
+			// check the number of files reached, if MaxResults is reached,
+			// stop walking the directory
+			if opts.MaxResults > 0 {
+				if count == opts.MaxResults {
+					return io.EOF
+				}
+			}
 
 			return nil
 		})
