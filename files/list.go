@@ -3,6 +3,7 @@ package files
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,10 +28,12 @@ type ListOptions struct {
 	// .gitignore (fnmatch) format patterns for file inclusions and exclusions
 	Include []string
 	Exclude []string
+	// max results
+	MaxResults int
 }
 
 // ListFiles returns path of files and or folders under listPath
-// inclusions/exclusions/recursion is defined by optds
+// inclusions/exclusions/recursion is defined by opts
 func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 	// check folder exists
 	if _, err := os.Stat(listPath); os.IsNotExist(err) {
@@ -111,6 +114,7 @@ func ShouldIncludePath(path string, include, exclude []string) bool {
 
 func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 	var res []string
+	count := 0 // initialize a counter to keep track of the number of files returned
 	err := filepath.Walk(listPath,
 		func(filePath string, entry os.FileInfo, err error) error {
 			if err != nil {
@@ -128,6 +132,12 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 			// should we include this file?
 			if shouldIncludeEntry(listPath, filePath, entry, opts) {
 				res = append(res, filePath)
+				count++ // increment the counter
+			}
+			// check the number of files reached, if MaxResults is reached,
+			// stop walking the directory
+			if count == opts.MaxResults {
+				return io.EOF
 			}
 
 			return nil
