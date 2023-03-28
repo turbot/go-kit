@@ -136,8 +136,10 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 			}
 			// check the number of files reached, if MaxResults is reached,
 			// stop walking the directory
-			if count == opts.MaxResults {
-				return io.EOF
+			if opts.MaxResults > 0 {
+				if count == opts.MaxResults {
+					return io.EOF
+				}
 			}
 
 			return nil
