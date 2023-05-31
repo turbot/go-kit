@@ -3,6 +3,7 @@ package files
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -111,12 +112,16 @@ func ShouldIncludePath(path string, include, exclude []string) bool {
 
 func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 	var res []string
-	err := filepath.Walk(listPath,
-		func(filePath string, entry os.FileInfo, err error) error {
+	err := filepath.WalkDir(listPath,
+		func(filePath string, entry fs.DirEntry, err error) error {
 			if err != nil {
 				if _, ok := err.(*os.PathError); ok {
 					// ignore path errors - this may be for a file which has been removed during the walk
 					return nil
+				}
+				if entry.IsDir() {
+					// TO DO LOG??
+					return fs.SkipDir
 				}
 				return err
 			}
@@ -124,10 +129,11 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 			if filePath == listPath {
 				return nil
 			}
-
 			// should we include this file?
 			if shouldIncludeEntry(listPath, filePath, entry, opts) {
 				res = append(res, filePath)
+			} else if entry.IsDir() && !shouldSearchInDir(listPath, filePath, opts) {
+				return fs.SkipDir
 			}
 
 			return nil
@@ -144,11 +150,10 @@ func listFilesFlat(listPath string, opts *ListOptions) ([]string, error) {
 	var matches []string
 	for _, entry := range entries {
 		filePath := filepath.Join(listPath, entry.Name())
-		info, err := entry.Info()
 		if err != nil {
 			continue
 		}
-		if shouldIncludeEntry(listPath, filePath, info, opts) {
+		if shouldIncludeEntry(listPath, filePath, entry, opts) {
 			matches = append(matches, filePath)
 		}
 	}
@@ -156,7 +161,7 @@ func listFilesFlat(listPath string, opts *ListOptions) ([]string, error) {
 }
 
 // should the list results include this entry, based on the list options
-func shouldIncludeEntry(listPath, filePath string, entry os.FileInfo, opts *ListOptions) bool {
+func shouldIncludeEntry(listPath, filePath string, entry fs.DirEntry, opts *ListOptions) bool {
 	if entry.IsDir() {
 		// if this is a directory and we are not including directories, exclude
 		if opts.Flags&Directories == 0 {
@@ -170,6 +175,32 @@ func shouldIncludeEntry(listPath, filePath string, entry os.FileInfo, opts *List
 	}
 
 	return ShouldIncludePath(filePath, ResolveGlobRoots(opts.Include, listPath), ResolveGlobRoots(opts.Exclude, listPath))
+}
+
+// shouldSearchInDir returns whether the specified directory satisfies the inclusion and exclusion options
+// (in .gitignore format)
+func shouldSearchInDir(listPath, dirPath string, opts *ListOptions) bool {
+	// if no include list provided, default to including everything
+	if len(opts.Include) == 0 {
+		return true
+	}
+	include := ResolveGlobRoots(opts.Include, listPath)
+
+	pathLen := len(strings.Split(dirPath, string(os.PathSeparator)))
+
+	// if the entry matches ANY of the include patterns, include
+	for _, includePattern := range include {
+		// trim the include pattern to be no longer than the path length
+		includeSegments := strings.Split(includePattern, string(os.PathSeparator))
+		if len(includeSegments) > pathLen {
+			includePattern = strings.Join(includeSegments[:pathLen], string(os.PathSeparator))
+		}
+
+		if Match(includePattern, dirPath) {
+			return true
+		}
+	}
+	return false
 }
 
 // ResolveGlobRoots resolve the glob patter for each of the given root paths
