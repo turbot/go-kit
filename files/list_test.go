@@ -179,199 +179,212 @@ var testCasesListFiles = map[string]listFilesTest{
 			Flags:   AllRecursive,
 			Include: []string{"*.sp"},
 		},
+		expected: []string{"test_data/list_test2/mod.sp"},
+	},
+	"TopLevelRecursive": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags:   AllRecursive,
+			Include: []string{"**/*.spc"},
+		},
+		expected: []string{
+			"test_data/list_test1/config/aws.spc",
+			"test_data/list_test1/config/default.spc",
+		},
+	},
+	"RecursiveFromARoot": {
+		source: "test_data/list_test2",
+		options: &ListOptions{
+			Flags:   AllRecursive,
+			Include: []string{"a2/**/*.sp"},
+		},
+		expected: []string{
+			"test_data/list_test2/a2/mod.sp",
+			"test_data/list_test2/a2/q1.sp",
+			"test_data/list_test2/a2/q2.sp",
+			"test_data/list_test2/a2/b/mod.sp",
+			"test_data/list_test2/a2/b/q1.sp",
+			"test_data/list_test2/a2/b/q2.sp",
+			"test_data/list_test2/a2/c/mod.sp",
+			"test_data/list_test2/a2/c/q1.sp",
+			"test_data/list_test2/a2/c/q2.sp",
+			"test_data/list_test2/a2/c/d/mod.sp",
+			"test_data/list_test2/a2/c/d/q1.sp",
+			"test_data/list_test2/a2/c/d/q2.sp",
+			"test_data/list_test2/a2/c/d/e/mod.sp",
+			"test_data/list_test2/a2/c/d/e/q1.sp",
+			"test_data/list_test2/a2/c/d/e/q2.sp",
+		},
+	},
+	"AllFlat": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags: AllFlat,
+		},
+		expected: []string{
+			"test_data/list_test1/.steampipe",
+			"test_data/list_test1/a",
+			"test_data/list_test1/a.swp",
+			"test_data/list_test1/b",
+			"test_data/list_test1/b.sp",
+			"test_data/list_test1/config",
+		},
+	},
+	"FilesFlat": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags: FilesFlat,
+		},
+		expected: []string{
+			"test_data/list_test1/a.swp",
+			"test_data/list_test1/b.sp",
+		},
+	},
+	"DirectoriesFlat": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags: DirectoriesFlat,
+		},
+		expected: []string{
+			"test_data/list_test1/.steampipe",
+			"test_data/list_test1/a",
+			"test_data/list_test1/b",
+			"test_data/list_test1/config",
+		},
+	},
+	"DirectoriesRecursive": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags: DirectoriesRecursive,
+		},
 		expected: []string{
 			"test_data/list_test1/.steampipe",
 			"test_data/list_test1/.steampipe/mods",
 			"test_data/list_test1/.steampipe/mods/github.com",
 			"test_data/list_test1/.steampipe/mods/github.com/turbot",
 			"test_data/list_test1/.steampipe/mods/github.com/turbot/m1",
+			"test_data/list_test1/.steampipe/mods/github.com/turbot/m2",
+			"test_data/list_test1/a",
+			"test_data/list_test1/b",
+			"test_data/list_test1/config",
+		},
+	},
+	"DirectoriesRecursive, exclude  .steampipe/*": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags:   DirectoriesRecursive,
+			Exclude: []string{".steampipe", ".steampipe/**"},
+		},
+		expected: []string{
+			"test_data/list_test1/a",
+			"test_data/list_test1/b",
+			"test_data/list_test1/config",
+		},
+	},
+	"FilesRecursive": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags: FilesRecursive,
+		},
+		expected: []string{
 			"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
 			"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/q1.sp",
-			"test_data/list_test1/.steampipe/mods/github.com/turbot/m2",
 			"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/mod.sp",
 			"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/q1.sp",
-			"test_data/list_test1/a",
 			"test_data/list_test1/a.swp",
 			"test_data/list_test1/a/mod.sp",
 			"test_data/list_test1/a/q1.sp",
 			"test_data/list_test1/a/q2.sp",
-			"test_data/list_test1/b",
 			"test_data/list_test1/b.sp",
 			"test_data/list_test1/b/mod.sp",
 			"test_data/list_test1/b/q1.sp",
 			"test_data/list_test1/b/q2.sp",
-			"test_data/list_test1/config",
 			"test_data/list_test1/config/aws.spc",
 			"test_data/list_test1/config/default.spc",
 		},
 	},
-	//"AllFlat": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags: AllFlat,
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/.steampipe",
-	//		"test_data/list_test1/a",
-	//		"test_data/list_test1/a.swp",
-	//		"test_data/list_test1/b",
-	//		"test_data/list_test1/b.sp",
-	//		"test_data/list_test1/config",
-	//	},
-	//},
-	//"FilesFlat": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags: FilesFlat,
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/a.swp",
-	//		"test_data/list_test1/b.sp",
-	//	},
-	//},
-	//"DirectoriesFlat": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags: DirectoriesFlat,
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/.steampipe",
-	//		"test_data/list_test1/a",
-	//		"test_data/list_test1/b",
-	//		"test_data/list_test1/config",
-	//	},
-	//},
-	//"DirectoriesRecursive": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags: DirectoriesRecursive,
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/.steampipe",
-	//		"test_data/list_test1/.steampipe/mods",
-	//		"test_data/list_test1/.steampipe/mods/github.com",
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot",
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m1",
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m2",
-	//		"test_data/list_test1/a",
-	//		"test_data/list_test1/b",
-	//		"test_data/list_test1/config",
-	//	},
-	//},
-	//"DirectoriesRecursive, exclude  .steampipe/*": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags:   DirectoriesRecursive,
-	//		Exclude: []string{".steampipe", ".steampipe/**"},
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/a",
-	//		"test_data/list_test1/b",
-	//		"test_data/list_test1/config",
-	//	},
-	//},
-	//"FilesRecursive": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags: FilesRecursive,
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/q1.sp",
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/mod.sp",
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/q1.sp",
-	//		"test_data/list_test1/a.swp",
-	//		"test_data/list_test1/a/mod.sp",
-	//		"test_data/list_test1/a/q1.sp",
-	//		"test_data/list_test1/a/q2.sp",
-	//		"test_data/list_test1/b.sp",
-	//		"test_data/list_test1/b/mod.sp",
-	//		"test_data/list_test1/b/q1.sp",
-	//		"test_data/list_test1/b/q2.sp",
-	//		"test_data/list_test1/config/aws.spc",
-	//		"test_data/list_test1/config/default.spc",
-	//	},
-	//},
-	//"FilesRecursive non recursive glob": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags:   FilesRecursive,
-	//		Include: []string{"*.sp"},
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/b.sp",
-	//	},
-	//},
-	//"FilesRecursive, exclude  **/.steampipe/*": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags:   FilesRecursive,
-	//		Exclude: []string{".steampipe/**", ".steampipe/**/*"},
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/a.swp",
-	//		"test_data/list_test1/a/mod.sp",
-	//		"test_data/list_test1/a/q1.sp",
-	//		"test_data/list_test1/a/q2.sp",
-	//		"test_data/list_test1/b.sp",
-	//		"test_data/list_test1/b/mod.sp",
-	//		"test_data/list_test1/b/q1.sp",
-	//		"test_data/list_test1/b/q2.sp",
-	//		"test_data/list_test1/config/aws.spc",
-	//		"test_data/list_test1/config/default.spc",
-	//	},
-	//},
-	//"FilesRecursive, include  **/*.sp exclude .steampipe/**": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags:   FilesRecursive,
-	//		Exclude: []string{".steampipe/**"},
-	//		Include: []string{"**/*.sp"},
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/a/mod.sp",
-	//		"test_data/list_test1/a/q1.sp",
-	//		"test_data/list_test1/a/q2.sp",
-	//		"test_data/list_test1/b.sp",
-	//		"test_data/list_test1/b/mod.sp",
-	//		"test_data/list_test1/b/q1.sp",
-	//		"test_data/list_test1/b/q2.sp",
-	//	},
-	//},
-	//"FilesRecursive, include **/github.com/**/mod.sp": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags:   FilesRecursive,
-	//		Exclude: []string{},
-	//		Include: []string{"**/github.com/**/mod.sp"},
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/mod.sp",
-	//	},
-	//},
-	//"Selective": {
-	//	source: "test_data/list_test1",
-	//	options: &ListOptions{
-	//		Flags:   FilesRecursive,
-	//		Exclude: []string{},
-	//		Include: []string{"**/github.com/**/mod.sp", "a/mod.sp"},
-	//	},
-	//	expected: []string{
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
-	//		"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/mod.sp",
-	//		"test_data/list_test1/a/mod.sp",
-	//	},
-	//},
-	//"Single file with include - expects error": {
-	//	source: "test_data/list_test1/config/aws.spc",
-	//	options: &ListOptions{
-	//		Flags:   FilesRecursive,
-	//		Exclude: []string{},
-	//		Include: []string{"*"},
-	//	},
-	//	expected: "ERROR",
-	//},
+	"Single file with include - expects error": {
+		source: "test_data/list_test1/config/aws.spc",
+		options: &ListOptions{
+			Flags:   FilesRecursive,
+			Exclude: []string{},
+			Include: []string{"*"},
+		},
+		expected: "ERROR",
+	},
+	"FilesRecursive non recursive glob": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags:   FilesRecursive,
+			Include: []string{"*.sp"},
+		},
+		expected: []string{
+			"test_data/list_test1/b.sp",
+		},
+	},
+	"FilesRecursive, exclude  **/.steampipe/*": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags:   FilesRecursive,
+			Exclude: []string{".steampipe/**", ".steampipe/**/*"},
+		},
+		expected: []string{
+			"test_data/list_test1/a.swp",
+			"test_data/list_test1/a/mod.sp",
+			"test_data/list_test1/a/q1.sp",
+			"test_data/list_test1/a/q2.sp",
+			"test_data/list_test1/b.sp",
+			"test_data/list_test1/b/mod.sp",
+			"test_data/list_test1/b/q1.sp",
+			"test_data/list_test1/b/q2.sp",
+			"test_data/list_test1/config/aws.spc",
+			"test_data/list_test1/config/default.spc",
+		},
+	},
+	"FilesRecursive, include  **/*.sp exclude .steampipe/**": {
+		source: "test_data/list_test1",
+		options: &ListOptions{
+			Flags:   FilesRecursive,
+			Exclude: []string{".steampipe/**"},
+			Include: []string{"**/*.sp"},
+		},
+		expected: []string{
+			"test_data/list_test1/a/mod.sp",
+			"test_data/list_test1/a/q1.sp",
+			"test_data/list_test1/a/q2.sp",
+			"test_data/list_test1/b.sp",
+			"test_data/list_test1/b/mod.sp",
+			"test_data/list_test1/b/q1.sp",
+			"test_data/list_test1/b/q2.sp",
+		},
+	},
+
+	// tests disabled since we don't support multiple ** (yet)
+	// "FilesRecursive, include **/github.com/**/mod.sp": {
+	// 	source: "test_data/list_test1",
+	// 	options: &ListOptions{
+	// 		Flags:   FilesRecursive,
+	// 		Exclude: []string{},
+	// 		Include: []string{"**/github.com/**/mod.sp"},
+	// 	},
+	// 	expected: []string{
+	// 		"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
+	// 		"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/mod.sp",
+	// 	},
+	// },
+	// "Selective": {
+	// 	source: "test_data/list_test1",
+	// 	options: &ListOptions{
+	// 		Flags:   FilesRecursive,
+	// 		Exclude: []string{},
+	// 		Include: []string{"**/github.com/**/mod.sp", "a/mod.sp"},
+	// 	},
+	// 	expected: []string{
+	// 		"test_data/list_test1/.steampipe/mods/github.com/turbot/m1/mod.sp",
+	// 		"test_data/list_test1/.steampipe/mods/github.com/turbot/m2/mod.sp",
+	// 		"test_data/list_test1/a/mod.sp",
+	// 	},
+	// },
 }
 
 func TestListFiles(t *testing.T) {
