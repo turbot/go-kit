@@ -196,7 +196,7 @@ func shouldSearchInDir(listPath, dirPath string, opts *ListOptions) bool {
 			includePattern = strings.Join(includeSegments[:pathLen], string(os.PathSeparator))
 		}
 
-		if Match(includePattern, dirPath, AsDir) {
+		if Match(includePattern, dirPath, WithAsDir) {
 			return true
 		}
 	}

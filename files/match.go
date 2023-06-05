@@ -12,12 +12,18 @@ import (
 const dblAsterisks = "**"
 
 type matchConfig struct {
-	asDir bool // adds special handling for directories
+	// when matching '**' for directories, we should only look for prefix matches
+	// and not match glob segments after '**'
+	// e.g:
+	// 		when matching a2/b/**/*.sp with the directory 'a2/b/c/d',
+	// 		if we do a whole match, it will definitely fail, since matching
+	// 		'*.sp' will evaluate to a false
+	asDir bool
 }
 
 type MatchOption func(config *matchConfig)
 
-var AsDir MatchOption = func(config *matchConfig) {
+var WithAsDir MatchOption = func(config *matchConfig) {
 	config.asDir = true
 }
 
@@ -59,8 +65,10 @@ func evalDblAsterisk(pattern, value string, dirMatch bool) bool {
 			patternPart = strings.TrimSuffix(patternPart, string(os.PathSeparator))
 			prefixMatch := prefixMatches(patternPart, value)
 			if prefixMatch && dirMatch {
-				// if value points to a directory and we have a prefix match
-				// then that is enough
+				// if we are only matching directories, a prefix match is required
+				// if we continue with a suffix match from here, it will fail, since
+				// there's no suffix to match with, since the path in 'value' is that
+				// of a directory
 				return true
 			}
 
