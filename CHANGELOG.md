@@ -1,7 +1,10 @@
-## v0.6.0 [tbd]
+## v0.6.0 [2023-06-05]
 _What's new?_
 * Add `UpgradeRWMutex`. ([#42](https://github.com/turbot/go-kit/issues/42))
-
+  Optimise list files to recursively traverse directories only if there's a match.  ([#49](https://github.com/turbot/go-kit/issues/49))
+* Add utilities to work with golang maps. ([#50](https://github.com/turbot/go-kit/issues/50))
+* Add MaxResults to ListOptions type to limit number of files listing. ([#45](https://github.com/turbot/go-kit/issues/45))
+* 
 ## v0.5.0 [2022-11-30]
 _What's new?_
 * Add file watcher. ([#26](https://github.com/turbot/go-kit/issues/26))
