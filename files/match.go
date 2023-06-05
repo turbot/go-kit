@@ -2,23 +2,44 @@ package files
 
 import (
 	"fmt"
-	"github.com/danwakefield/fnmatch"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/danwakefield/fnmatch"
 )
 
 const dblAsterisks = "**"
 
-func Match(pattern, value string) bool {
+type matchConfig struct {
+	// when matching '**' for directories, we should only look for prefix matches
+	// and not match glob segments after '**'
+	// e.g:
+	// 		when matching a2/b/**/*.sp with the directory 'a2/b/c/d',
+	// 		if we do a whole match, it will definitely fail, since matching
+	// 		'*.sp' will evaluate to a false
+	asDir bool
+}
+
+type MatchOption func(config *matchConfig)
+
+var WithAsDir MatchOption = func(config *matchConfig) {
+	config.asDir = true
+}
+
+func Match(pattern, value string, options ...MatchOption) bool {
+	config := matchConfig{}
+	for _, mo := range options {
+		mo(&config)
+	}
 	if strings.Contains(pattern, dblAsterisks) {
-		return evalDblAsterisk(pattern, value)
+		return evalDblAsterisk(pattern, value, config.asDir)
 	} else {
 		return fnmatch.Match(pattern, value, fnmatch.FNM_PATHNAME)
 	}
 }
 
-func evalDblAsterisk(pattern, value string) bool {
+func evalDblAsterisk(pattern, value string, dirMatch bool) bool {
 	// A leading "**" followed by a slash means match in all directories.
 	// For example, "**/foo" matches file or directory "foo" anywhere
 	// "**/foo/bar" matches file or directory "bar" anywhere that is directly under directory "foo".
@@ -42,7 +63,16 @@ func evalDblAsterisk(pattern, value string) bool {
 		switch i {
 		case 0:
 			patternPart = strings.TrimSuffix(patternPart, string(os.PathSeparator))
-			if !prefixMatches(patternPart, value) {
+			prefixMatch := prefixMatches(patternPart, value)
+			if prefixMatch && dirMatch {
+				// if we are only matching directories, a prefix match is required
+				// if we continue with a suffix match from here, it will fail, since
+				// there's no suffix to match with, since the path in 'value' is that
+				// of a directory
+				return true
+			}
+
+			if !prefixMatch {
 				return false
 			}
 		case len(patternParts) - 1: // last part
