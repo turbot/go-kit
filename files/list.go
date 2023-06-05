@@ -149,16 +149,9 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 			} else if entry.IsDir() && !shouldSearchInDir(listPath, filePath, opts) {
 				return fs.SkipDir
 			}
-			// check the number of files reached, if MaxResults is reached,
-			// stop walking the directory
-			if opts.MaxResults > 0 {
-				if count == opts.MaxResults {
-					return io.EOF
-				}
-			}
-
 			return nil
 		})
+	// set err to nil in case of EOF error so that the code doesn't exit from here
 	if err == io.EOF {
 		err = nil
 	}
