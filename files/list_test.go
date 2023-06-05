@@ -141,6 +141,21 @@ var testCasesListFiles = map[string]listFilesTest{
 			"test_data/list_test1/config/default.spc",
 		},
 	},
+	"SingleHopInclusion": {
+		source: "test_data/list_test2",
+		options: &ListOptions{
+			Flags:   AllRecursive,
+			Include: []string{"a2/*/*.sp"},
+		},
+		expected: []string{
+			"test_data/list_test2/a2/b/mod.sp",
+			"test_data/list_test2/a2/b/q1.sp",
+			"test_data/list_test2/a2/b/q2.sp",
+			"test_data/list_test2/a2/c/mod.sp",
+			"test_data/list_test2/a2/c/q1.sp",
+			"test_data/list_test2/a2/c/q2.sp",
+		},
+	},
 	"TopLevelOnly": {
 		source: "test_data/list_test2",
 		options: &ListOptions{
