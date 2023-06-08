@@ -259,6 +259,14 @@ var testCasesListFiles = map[string]listFilesTest{
 		options: &ListOptions{
 			Flags: DirectoriesRecursive,
 		},
+		preRun: func() {
+			// create an empty directory
+			os.Mkdir(filepath.Join(wd, "test_data/list_test3/a/empty"), 0644)
+		},
+		postRun: func() {
+			// remove empty directory
+			os.RemoveAll(filepath.Join(wd, "test_data/list_test3/a/empty"))
+		},
 		expected: []string{
 			"test_data/list_test3/.steampipe",
 			"test_data/list_test3/.steampipe/mods",
