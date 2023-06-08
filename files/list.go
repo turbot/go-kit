@@ -190,14 +190,12 @@ func shouldIncludeEntry(listPath, filePath string, entry fs.DirEntry, opts *List
 			return false
 		}
 
-		// if dir read fails, skip this directory since the listing code will probably also fail to read it
+		// this is a directory and we are including directories
+		// check if we can include empty directories
 		if opts.Flags&NotEmpty != 0 {
 			ls, err := os.ReadDir(filePath)
 			if err != nil {
-				// if we can't read the contents
-				// of the directory, there's no point in including it
-				// since the calling code will get errors anyway when
-				// it tries to read the contents
+				// if dir read fails, skip this directory since the listing code will probably also fail to read it
 				return false
 			}
 
