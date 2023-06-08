@@ -13,9 +13,13 @@ import (
 type ListFlag uint
 
 const (
+	// Files lists only files
 	Files ListFlag = 1 << iota
+	// Directories lists only directories
 	Directories
+	// Recursively traverses directories
 	Recursive
+	// Ignores empty directories
 	NotEmpty
 	AllFlat              = Files | Directories
 	AllRecursive         = Files | Directories | Recursive
