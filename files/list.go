@@ -195,11 +195,11 @@ func shouldIncludeEntry(listPath, filePath string, entry fs.DirEntry, opts *List
 		if opts.Flags&NotEmpty != 0 {
 			ls, err := os.ReadDir(filePath)
 			if err != nil {
-				// there was an error
-				// let's include this
-				// if this is not required, it will get excluded
-				// during the glob check afterward
-				return true
+				// if we can't read the contents
+				// of the directory, there's no point in including it
+				// since the calling code will get errors anyway when
+				// it tries to read the contents
+				return false
 			}
 
 			// do not include this if it's empty
