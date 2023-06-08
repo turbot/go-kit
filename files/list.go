@@ -13,9 +13,14 @@ import (
 type ListFlag uint
 
 const (
+	// Files lists only files
 	Files ListFlag = 1 << iota
+	// Directories lists only directories
 	Directories
+	// Recursively traverses directories
 	Recursive
+	// Ignores empty directories
+	NotEmpty
 	AllFlat              = Files | Directories
 	AllRecursive         = Files | Directories | Recursive
 	FilesRecursive       = Files | Recursive
@@ -25,10 +30,10 @@ const (
 )
 
 type ListOptions struct {
-	Flags ListFlag
 	// .gitignore (fnmatch) format patterns for file inclusions and exclusions
 	Include []string
 	Exclude []string
+	Flags   ListFlag
 	// max results
 	MaxResults int
 }
@@ -183,6 +188,21 @@ func shouldIncludeEntry(listPath, filePath string, entry fs.DirEntry, opts *List
 		// if this is a directory and we are not including directories, exclude
 		if opts.Flags&Directories == 0 {
 			return false
+		}
+
+		// this is a directory and we are including directories
+		// check if we can include empty directories
+		if opts.Flags&NotEmpty != 0 {
+			ls, err := os.ReadDir(filePath)
+			if err != nil {
+				// if dir read fails, skip this directory since the listing code will probably also fail to read it
+				return false
+			}
+
+			// do not include this if it's empty
+			if len(ls) == 0 {
+				return false
+			}
 		}
 	} else {
 		// if this is a file and we are not including files, exclude
