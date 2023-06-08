@@ -1,7 +1,11 @@
+## v0.7.0 [2023-06-08]
+_What's new?_ 
+* Adds flag in 'ListFiles' to skip over empty directories. ([#53](https://github.com/turbot/go-kit/issues/53))
+
 ## v0.6.0 [2023-06-05]
 _What's new?_
 * Add `UpgradeRWMutex`. ([#42](https://github.com/turbot/go-kit/issues/42))
-  Optimise list files to recursively traverse directories only if there's a match.  ([#49](https://github.com/turbot/go-kit/issues/49))
+* Optimise list files to recursively traverse directories only if there's a match.  ([#49](https://github.com/turbot/go-kit/issues/49))
 * Add utilities to work with golang maps. ([#50](https://github.com/turbot/go-kit/issues/50))
 * Add MaxResults to ListOptions type to limit number of files listing. ([#45](https://github.com/turbot/go-kit/issues/45))
 * 
