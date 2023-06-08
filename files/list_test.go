@@ -252,6 +252,39 @@ var testCasesListFiles = map[string]listFilesTest{
 			"test_data/list_test1/config",
 		},
 	},
+	"DirectoriesRecursiveWithEmpty": {
+		source: "test_data/list_test3",
+		options: &ListOptions{
+			Flags: DirectoriesRecursive,
+		},
+		expected: []string{
+			"test_data/list_test3/.steampipe",
+			"test_data/list_test3/.steampipe/mods",
+			"test_data/list_test3/.steampipe/mods/github.com",
+			"test_data/list_test3/.steampipe/mods/github.com/turbot",
+			"test_data/list_test3/.steampipe/mods/github.com/turbot/m1",
+			"test_data/list_test3/.steampipe/mods/github.com/turbot/m2",
+			"test_data/list_test3/a",
+			"test_data/list_test3/a/empty",
+			"test_data/list_test3/b",
+		},
+	},
+	"DirectoriesRecursiveNotEmpty": {
+		source: "test_data/list_test3",
+		options: &ListOptions{
+			Flags: DirectoriesRecursive | NotEmpty,
+		},
+		expected: []string{
+			"test_data/list_test3/.steampipe",
+			"test_data/list_test3/.steampipe/mods",
+			"test_data/list_test3/.steampipe/mods/github.com",
+			"test_data/list_test3/.steampipe/mods/github.com/turbot",
+			"test_data/list_test3/.steampipe/mods/github.com/turbot/m1",
+			"test_data/list_test3/.steampipe/mods/github.com/turbot/m2",
+			"test_data/list_test3/a",
+			"test_data/list_test3/b",
+		},
+	},
 	"DirectoriesRecursive, exclude  .steampipe/*": {
 		source: "test_data/list_test1",
 		options: &ListOptions{
