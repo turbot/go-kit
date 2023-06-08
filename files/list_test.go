@@ -118,9 +118,11 @@ func TestGlobRoot(t *testing.T) {
 }
 
 type listFilesTest struct {
-	source   string
-	options  *ListOptions
 	expected interface{}
+	options  *ListOptions
+	preRun   func()
+	postRun  func()
+	source   string
 }
 
 var testCasesListFiles = map[string]listFilesTest{
@@ -274,6 +276,14 @@ var testCasesListFiles = map[string]listFilesTest{
 		options: &ListOptions{
 			Flags: DirectoriesRecursive | NotEmpty,
 		},
+		preRun: func() {
+			// create an empty directory
+			os.Mkdir(filepath.Join(wd, "test_data/list_test3/a/empty"), 0644)
+		},
+		postRun: func() {
+			// remove empty directory
+			os.RemoveAll(filepath.Join(wd, "test_data/list_test3/a/empty"))
+		},
 		expected: []string{
 			"test_data/list_test3/.steampipe",
 			"test_data/list_test3/.steampipe/mods",
@@ -405,6 +415,12 @@ var testCasesListFiles = map[string]listFilesTest{
 
 func TestListFiles(t *testing.T) {
 	for name, test := range testCasesListFiles {
+		if test.preRun != nil {
+			test.preRun()
+		}
+		if test.postRun != nil {
+			defer test.postRun()
+		}
 		listPath, err := filepath.Abs(test.source)
 		if err != nil {
 			t.Errorf("failed to build absolute list filepath from %s", test.source)
