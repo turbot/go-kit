@@ -5,6 +5,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"syscall"
 )
 
 // Tildefy converts ~ to home directory
@@ -32,6 +33,11 @@ func Tildefy(filePath string) (string, error) {
 func FileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
+		return false
+	}
+	if pe, ok := err.(*os.PathError); ok && pe.Err == syscall.ENAMETOOLONG {
+		// this path is too long
+		// if the OS can't handle it, this file definitely doesn't exist
 		return false
 	}
 	return !info.IsDir()
