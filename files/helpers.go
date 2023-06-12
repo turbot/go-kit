@@ -48,5 +48,10 @@ func DirectoryExists(dirname string) bool {
 	if os.IsNotExist(err) {
 		return false
 	}
+	if pe, ok := err.(*os.PathError); ok && pe.Err == syscall.ENAMETOOLONG {
+		// this path is too long
+		// if the OS can't handle it, this file definitely doesn't exist
+		return false
+	}
 	return info.IsDir()
 }
