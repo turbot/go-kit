@@ -5,7 +5,6 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
-	"syscall"
 )
 
 // Tildefy converts ~ to home directory
@@ -30,28 +29,19 @@ func Tildefy(filePath string) (string, error) {
 }
 
 // FileExists checks if a file exists and is not a directory
+// FileExists uses `os.Stat` under the hood and returns `false` if `os.Stat` returns an error
 func FileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
+	if info, err := os.Stat(filename); err == nil {
+		return !info.IsDir()
 	}
-	if pe, ok := err.(*os.PathError); ok && pe.Err == syscall.ENAMETOOLONG {
-		// this path is too long
-		// if the OS can't handle it, this file definitely doesn't exist
-		return false
-	}
-	return !info.IsDir()
+	return false
 }
 
+// DirectoryExists checks if a path exists and is a directory
+// DirectoryExists uses `os.Stat` under the hood and returns `false` if `os.Stat` returns an error
 func DirectoryExists(dirname string) bool {
-	info, err := os.Stat(dirname)
-	if os.IsNotExist(err) {
-		return false
+	if info, err := os.Stat(dirname); err == nil {
+		return info.IsDir()
 	}
-	if pe, ok := err.(*os.PathError); ok && pe.Err == syscall.ENAMETOOLONG {
-		// this path is too long
-		// if the OS can't handle it, this file definitely doesn't exist
-		return false
-	}
-	return info.IsDir()
+	return false
 }
