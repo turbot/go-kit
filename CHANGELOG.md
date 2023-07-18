@@ -1,3 +1,10 @@
+## v0.8.0 [tbd]
+_What's new?_
+* Adds `FilterMap`.([#59](https://github.com/turbot/go-kit/issues/59))
+
+_Bug fixes_
+* Remove `UpgradeRWMutex`, which had a potential race condition.([#60](https://github.com/turbot/go-kit/issues/60))
+
 ## v0.7.0 [2023-06-08]
 _What's new?_ 
 * Adds flag in 'ListFiles' to skip over empty directories. ([#53](https://github.com/turbot/go-kit/issues/53))
