@@ -11,6 +11,7 @@ import (
 	"github.com/turbot/go-kit/files"
 )
 
+// RotatingLogWriter is an io.Writer which can rotate the log files that it is writing to
 type RotatingLogWriter struct {
 	directory string
 	prefix    string
@@ -21,6 +22,8 @@ type RotatingLogWriter struct {
 	rotateLock sync.Mutex
 }
 
+// RotatingLogWriter returns io.Writer which always writes to a file in the given `directory`.
+// The file is named `{prefix}-YYYY-MM-DD.log`
 func NewRotatingLogWriter(directory string, prefix string) *RotatingLogWriter {
 	return &RotatingLogWriter{
 		directory: directory,
