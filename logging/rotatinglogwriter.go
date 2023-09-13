@@ -12,6 +12,7 @@ import (
 )
 
 // RotatingLogWriter is an io.Writer which can rotate the log files that it is writing to
+// Target files are rotated once per day according to the local system time
 type RotatingLogWriter struct {
 	directory string
 	prefix    string
@@ -23,7 +24,7 @@ type RotatingLogWriter struct {
 }
 
 // RotatingLogWriter returns io.Writer which always writes to a file in the given `directory`.
-// The file is named `{prefix}-YYYY-MM-DD.log`
+// The file is named `{prefix}-YYYY-MM-DD.log` and the log files are rotated once per day as per the system time
 func NewRotatingLogWriter(directory string, prefix string) *RotatingLogWriter {
 	return &RotatingLogWriter{
 		directory: directory,
