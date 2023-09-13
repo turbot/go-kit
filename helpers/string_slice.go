@@ -71,17 +71,3 @@ func RemoveFromStringSlice(slice []string, values ...string) []string {
 	}
 	return res
 }
-
-// StringSliceDistinct returns a slice with the unique elements the input string slice
-func StringSliceDistinct(slice []string) []string {
-	var res []string
-	countMap := make(map[string]int)
-	for _, item := range slice {
-		countMap[item]++
-		// if this is the first time we have come across this item, add to res
-		if countMap[item] == 1 {
-			res = append(res, item)
-		}
-	}
-	return res
-}
