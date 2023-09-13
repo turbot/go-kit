@@ -53,21 +53,3 @@ func StringSliceDiff(slice1, slice2 []string) (onlyInSlice1 []string) {
 	}
 	return
 }
-
-// RemoveFromStringSlice removes the given string from the string slice
-func RemoveFromStringSlice(slice []string, values ...string) []string {
-	var res []string
-	for _, item := range slice {
-		var remove bool
-		for _, value := range values {
-			if item == value {
-				remove = true
-				break
-			}
-		}
-		if !remove {
-			res = append(res, item)
-		}
-	}
-	return res
-}
