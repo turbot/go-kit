@@ -85,8 +85,3 @@ func StringSliceDistinct(slice []string) []string {
 	}
 	return res
 }
-
-// StringSliceHasDuplicates returns whether a string slice has duplicate elements
-func StringSliceHasDuplicates(slice []string) bool {
-	return len(slice) > len(StringSliceDistinct(slice))
-}
