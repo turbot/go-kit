@@ -1,6 +1,7 @@
-## v0.8.0 [tbd]
+## v0.8.0 [2023-09-13]
 _What's new?_
 * Adds `FilterMap`.([#59](https://github.com/turbot/go-kit/issues/59))
+* Adds `RotatingLogWriter`.([#63](https://github.com/turbot/go-kit/issues/63))
 
 _Bug fixes_
 * Remove `UpgradeRWMutex`, which had a potential race condition.([#60](https://github.com/turbot/go-kit/issues/60))
