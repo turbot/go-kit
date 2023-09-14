@@ -31,12 +31,34 @@ func NewRotatingLogWriter(directory string, prefix string) *RotatingLogWriter {
 		prefix:    prefix,
 	}
 }
+
+func (w *RotatingLogWriter) Write(p []byte) (n int, err error) {
+	expectedPath := filepath.Join(w.directory, fmt.Sprintf("%s-%s.log", w.prefix, time.Now().Format(time.DateOnly)))
+
+	// the code outside of this IF block should be simple and blazing fast
+	//
+	// the code inside the IF block will probably execute once in 24 hours at most
+	// for an instance, but the code outside is used by every log line
+	if w.currentPath != expectedPath {
+		if err := w.rotateLogTarget(expectedPath); err != nil {
+			return 0, err
+		}
+		// update the current path
+		w.currentPath = expectedPath
+
+		// update the writer
+		w.currentWriter, err = os.OpenFile(w.currentPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			err = fmt.Errorf("failed to open steampipe log file: %s", err.Error())
+		}
+	}
+
+	return w.currentWriter.Write(p)
+}
+
 func (w *RotatingLogWriter) rotateLogTarget(targetPath string) (err error) {
 	w.rotateLock.Lock()
 	defer w.rotateLock.Unlock()
-
-	// update to the current path
-	w.currentPath = targetPath
 
 	// check if the file actually doesn't exist
 	if files.FileExists(targetPath) {
@@ -51,31 +73,5 @@ func (w *RotatingLogWriter) rotateLogTarget(targetPath string) (err error) {
 	if isCloseable {
 		closeableWriter.Close()
 	}
-
-	// we could be in here because the file exists,
-	// but we are starting up for the first time
-	if w.currentWriter == nil {
-		// create a new one
-		w.currentWriter, err = os.OpenFile(w.currentPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			return fmt.Errorf("failed to open steampipe log file: %s", err.Error())
-		}
-	}
 	return nil
-}
-
-func (w *RotatingLogWriter) Write(p []byte) (n int, err error) {
-	expectedPath := filepath.Join(w.directory, fmt.Sprintf("%s-%s.log", w.prefix, time.Now().Format(time.DateOnly)))
-
-	// the code outside of this IF block should be simple and blazing fast
-	//
-	// the code inside the IF block will probably execute once in 24 hours at most
-	// for an instance, but the code outside is used by every log line
-	if w.currentPath != expectedPath {
-		if err := w.rotateLogTarget(expectedPath); err != nil {
-			return 0, err
-		}
-	}
-
-	return w.currentWriter.Write(p)
 }
