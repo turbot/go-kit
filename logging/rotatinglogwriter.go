@@ -35,13 +35,6 @@ func (w *RotatingLogWriter) rotateLogTarget(targetPath string) (err error) {
 	w.rotateLock.Lock()
 	defer w.rotateLock.Unlock()
 
-	defer func() {
-		if err != nil {
-			// if there's an error, nothing to do here
-			return
-		}
-	}()
-
 	// check if the file actually doesn't exist
 	if files.FileExists(targetPath) {
 		// nothing to do here
