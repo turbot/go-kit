@@ -31,25 +31,6 @@ func NewRotatingLogWriter(directory string, prefix string) *RotatingLogWriter {
 		prefix:    prefix,
 	}
 }
-func (w *RotatingLogWriter) rotateLogTarget(targetPath string) (err error) {
-	w.rotateLock.Lock()
-	defer w.rotateLock.Unlock()
-
-	// check if the file actually doesn't exist
-	if files.FileExists(targetPath) {
-		// nothing to do here
-		// another thread may have created it while we were waiting for the lock
-		return nil
-	}
-
-	// we need to flush the current one
-	// try to cast it to a Closer (if this is nil, isCloseable will be false)
-	closeableWriter, isCloseable := w.currentWriter.(io.Closer)
-	if isCloseable {
-		closeableWriter.Close()
-	}
-	return nil
-}
 
 func (w *RotatingLogWriter) Write(p []byte) (n int, err error) {
 	expectedPath := filepath.Join(w.directory, fmt.Sprintf("%s-%s.log", w.prefix, time.Now().Format(time.DateOnly)))
@@ -73,4 +54,24 @@ func (w *RotatingLogWriter) Write(p []byte) (n int, err error) {
 	}
 
 	return w.currentWriter.Write(p)
+}
+
+func (w *RotatingLogWriter) rotateLogTarget(targetPath string) (err error) {
+	w.rotateLock.Lock()
+	defer w.rotateLock.Unlock()
+
+	// check if the file actually doesn't exist
+	if files.FileExists(targetPath) {
+		// nothing to do here
+		// another thread may have created it while we were waiting for the lock
+		return nil
+	}
+
+	// we need to flush the current one
+	// try to cast it to a Closer (if this is nil, isCloseable will be false)
+	closeableWriter, isCloseable := w.currentWriter.(io.Closer)
+	if isCloseable {
+		closeableWriter.Close()
+	}
+	return nil
 }
