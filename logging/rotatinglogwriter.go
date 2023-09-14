@@ -35,9 +35,6 @@ func (w *RotatingLogWriter) rotateLogTarget(targetPath string) (err error) {
 	w.rotateLock.Lock()
 	defer w.rotateLock.Unlock()
 
-	// update to the current path
-	w.currentPath = targetPath
-
 	// check if the file actually doesn't exist
 	if files.FileExists(targetPath) {
 		// nothing to do here
@@ -50,16 +47,6 @@ func (w *RotatingLogWriter) rotateLogTarget(targetPath string) (err error) {
 	closeableWriter, isCloseable := w.currentWriter.(io.Closer)
 	if isCloseable {
 		closeableWriter.Close()
-	}
-
-	// we could be in here because the file exists,
-	// but we are starting up for the first time
-	if w.currentWriter == nil {
-		// create a new one
-		w.currentWriter, err = os.OpenFile(w.currentPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			return fmt.Errorf("failed to open steampipe log file: %s", err.Error())
-		}
 	}
 	return nil
 }
@@ -74,6 +61,17 @@ func (w *RotatingLogWriter) Write(p []byte) (n int, err error) {
 	if w.currentPath != expectedPath {
 		if err := w.rotateLogTarget(expectedPath); err != nil {
 			return 0, err
+		}
+		w.currentPath = expectedPath
+	}
+
+	// we could be in here because the file exists,
+	// but we are starting up for the first time
+	if w.currentWriter == nil {
+		// create a new one
+		w.currentWriter, err = os.OpenFile(w.currentPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			return 0, fmt.Errorf("failed to open steampipe log file: %s", err.Error())
 		}
 	}
 
