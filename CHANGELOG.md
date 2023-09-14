@@ -1,6 +1,6 @@
 ## v0.8.1 [2023-09-14]
 _Bug fixes_
-* Fix issue with `RotatingLogWriter` where it panics when starting up.([#67](https://github.com/turbot/go-kit/issues/67))
+* Fixes issue with `RotatingLogWriter` where it panics when starting up.([#67](https://github.com/turbot/go-kit/issues/67))
 
 ## v0.8.0 [2023-09-13]
 _What's new?_
