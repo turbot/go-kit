@@ -1,10 +1,12 @@
 package files
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,6 +43,10 @@ type ListOptions struct {
 // ListFiles returns path of files and or folders under listPath
 // inclusions/exclusions/recursion is defined by opts
 func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
+	return ListFilesWithContext(context.Background(), listPath, opts)
+}
+
+func ListFilesWithContext(ctx context.Context, listPath string, opts *ListOptions) ([]string, error) {
 	// check folder exists
 	if _, err := os.Stat(listPath); os.IsNotExist(err) {
 		return nil, nil
@@ -69,9 +75,9 @@ func ListFiles(listPath string, opts *ListOptions) ([]string, error) {
 	}
 
 	if opts.Flags&Recursive != 0 {
-		return listFilesRecursive(listPath, opts)
+		return listFilesRecursive(ctx, listPath, opts)
 	}
-	return listFilesFlat(listPath, opts)
+	return listFilesFlat(ctx, listPath, opts)
 }
 
 // InclusionsFromExtensions takes a list of file extensions and convert into a .gitgnore format inclusions list
@@ -118,12 +124,16 @@ func ShouldIncludePath(path string, include, exclude []string) bool {
 	return false
 }
 
-func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
+func listFilesRecursive(ctx context.Context, listPath string, opts *ListOptions) ([]string, error) {
 	var res []string
 	count := 0 // initialize a counter to keep track of the number of files returned
 	err := filepath.WalkDir(listPath,
 		func(filePath string, entry fs.DirEntry, err error) error {
-
+			// handle context cancellations
+			if ctx.Err() != nil {
+				log.Println("[INFO] context canceled")
+				return fs.SkipAll
+			}
 			if err != nil {
 				if _, ok := err.(*os.PathError); ok {
 					// ignore path errors - this may be for a file which has been removed during the walk
@@ -160,10 +170,15 @@ func listFilesRecursive(listPath string, opts *ListOptions) ([]string, error) {
 	if err == io.EOF {
 		err = nil
 	}
+	// skipAll sends a nil error in case of context cancellation - we want to capture the context cancellation error
+	if err == nil {
+		err = ctx.Err()
+	}
 	return res, err
 }
 
-func listFilesFlat(listPath string, opts *ListOptions) ([]string, error) {
+func listFilesFlat(ctx context.Context, listPath string, opts *ListOptions) ([]string, error) {
+
 	entries, err := os.ReadDir(listPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read folder %s: %v", listPath, err)
@@ -171,6 +186,10 @@ func listFilesFlat(listPath string, opts *ListOptions) ([]string, error) {
 
 	var matches []string
 	for _, entry := range entries {
+		// handle context cancellations
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
 		filePath := filepath.Join(listPath, entry.Name())
 		if err != nil {
 			continue
