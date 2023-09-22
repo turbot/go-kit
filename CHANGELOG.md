@@ -1,3 +1,7 @@
+## v0.9.0 [tbd]
+_What's new?_
+* Add `ListFilesWithContext` function to handle context cancellations.([#70](https://github.com/turbot/go-kit/issues/70))
+
 ## v0.8.1 [2023-09-14]
 _Bug fixes_
 * Fixes issue with `RotatingLogWriter` where it panics when starting up.([#67](https://github.com/turbot/go-kit/issues/67))
