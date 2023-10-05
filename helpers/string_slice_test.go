@@ -240,3 +240,46 @@ func TestStringSliceHasDuplicates(t *testing.T) {
 		}
 	}
 }
+
+type stringSliceEqualIgnoreOrderTest struct {
+	Name     string
+	A        []string
+	B        []string
+	Expected bool
+}
+
+var testCaseStringSliceEqualIgnoreOrder = []stringSliceEqualIgnoreOrderTest{
+	{
+		"equal ignore order",
+		[]string{"A", "B", "c"},
+		[]string{"c", "A", "B"},
+		true,
+	},
+	{
+		"equal ignore order 2",
+		[]string{"feeder", "just", "a", "day"},
+		[]string{"just", "feeder", "a", "day"},
+		true,
+	},
+	{
+		"not equal",
+		[]string{"A", "B", "B"},
+		[]string{"A", "B", "C"},
+		false,
+	},
+	{
+		"not equal",
+		[]string{"feeders", "just", "a", "day"},
+		[]string{"just", "feeder", "a", "day"},
+		false,
+	},
+}
+
+func TestStringSliceEqualIgnoreOrder(t *testing.T) {
+	for _, test := range testCaseStringSliceEqualIgnoreOrder {
+		res := StringSliceEqualIgnoreOrder(test.A, test.B)
+		if !reflect.DeepEqual(res, test.Expected) {
+			t.Errorf(`Test: '%s'' FAILED : expected %v, got %v`, test.Name, test.Expected, res)
+		}
+	}
+}

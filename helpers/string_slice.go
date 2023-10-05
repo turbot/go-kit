@@ -1,6 +1,17 @@
 package helpers
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+)
+
+func StringSliceEqualIgnoreOrder(a, b []string) bool {
+	less := func(a, b string) bool { return a < b }
+	return cmp.Diff(a, b, cmpopts.SortSlices(less)) == ""
+
+}
 
 // StringSliceContains returns whether the string slice contains the given string
 func StringSliceContains(slice []string, val string) bool {
