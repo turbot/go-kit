@@ -7,7 +7,7 @@ require (
 	github.com/btubbs/datetime v0.1.1
 	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/hashicorp/hcl/v2 v2.18.1
+	github.com/hashicorp/hcl/v2 v2.19.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.8.4
 	github.com/tkrajina/go-reflector v0.5.6
