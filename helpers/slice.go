@@ -1,4 +1,4 @@
-package type_conversion
+package helpers
 
 import (
 	"reflect"
@@ -8,7 +8,7 @@ import (
 // AnySliceToTypedSlice determines whether input is []any and if so converts to an array of the underlying type
 func AnySliceToTypedSlice(input any) any {
 	result := input
-	switch result.(type) {
+	switch result.(type) { //nolint:gocritic // TODO fix this gocritic lint suggestion
 	case []any:
 		val := reflect.ValueOf(result)
 		if val.Kind() == reflect.Slice {
