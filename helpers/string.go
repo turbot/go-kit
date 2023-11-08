@@ -133,3 +133,10 @@ func PadRight(str string, length int, pad byte) string {
 	}
 	return buf.String()
 }
+
+// TrimBlankLines removes any empty lines from the string
+func TrimBlankLines(str string) string {
+	lines := strings.Split(str, "\n")
+	strippedLines := RemoveFromStringSlice(lines, "")
+	return strings.Join(strippedLines, "\n")
+}
