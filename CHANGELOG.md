@@ -1,6 +1,9 @@
 ## v0.9.0 [tbd]
 _What's new?_
 * Add `ListFilesWithContext` function to handle context cancellations.([#70](https://github.com/turbot/go-kit/issues/70))
+* Add `AnySliceToTypedSlice` and `ToTypedSlice` functions.([#78](https://github.com/turbot/go-kit/issues/78))
+* Add `TrimBlankLine` function.([#79](https://github.com/turbot/go-kit/issues/79))
+* Add StringSliceEqualIgnoreOrder function to handle string slices comparison ignoring order. ([#741](https://github.com/turbot/go-kit/issues/74))
 
 ## v0.8.1 [2023-09-14]
 _Bug fixes_
