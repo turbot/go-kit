@@ -96,7 +96,7 @@ type cleanTest struct {
 
 var testCasesClean = map[string]cleanTest{
 	"unicode, colour codes - width == string length": {
-		input: "[38;5;32myo,[0m [38;5;82m世界![0m",
+		input:    "[38;5;32myo,[0m [38;5;82m世界![0m",
 		expected: "yo, 世界!",
 	},
 }
@@ -104,6 +104,35 @@ var testCasesClean = map[string]cleanTest{
 func TestClean(t *testing.T) {
 	for name, test := range testCasesClean {
 		output := Clean(test.input)
+		if output != test.expected {
+			t.Errorf("Test: '%s'' FAILED : \nexpected:\n %s \ngot:\n %s\n", name, test.expected, output)
+		}
+	}
+}
+
+type trimBlankLinesTest struct {
+	input    string
+	expected string
+}
+
+var testCasesTrimBlankLines = map[string]trimBlankLinesTest{
+	"no blanklines": {
+		input:    "foo bar",
+		expected: "foo bar",
+	},
+	"single blanklines": {
+		input:    "foo\n\nbar\n\nfoobar",
+		expected: "foo\nbar\nfoobar",
+	},
+	"multiple blanklines": {
+		input:    "foo\n\n\n\n\n\n\n\n\n\nbar\n\nfoobar",
+		expected: "foo\nbar\nfoobar",
+	},
+}
+
+func TestTrimBlankLines(t *testing.T) {
+	for name, test := range testCasesTrimBlankLines {
+		output := TrimBlankLines(test.input)
 		if output != test.expected {
 			t.Errorf("Test: '%s'' FAILED : \nexpected:\n %s \ngot:\n %s\n", name, test.expected, output)
 		}
