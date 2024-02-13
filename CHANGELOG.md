@@ -1,6 +1,6 @@
 
 
-## v0.10.0 [2023-12-18]
+## v0.10.0 [tbd]
 _What's new?_
 * Add `helpers.AppendSliceUnique`. ([#86](https://github.com/turbot/go-kit/issues/86))
 
