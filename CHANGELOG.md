@@ -1,3 +1,9 @@
+
+
+## v0.10.0 [2023-12-18]
+_What's new?_
+* Add `helpers.AppendSliceUnique`. ([#86](https://github.com/turbot/go-kit/issues/86))
+
 ## v0.9.0 [2023-12-18]
 _What's new?_
 * Add `ListFilesWithContext` function to handle context cancellations.([#70](https://github.com/turbot/go-kit/issues/70))
