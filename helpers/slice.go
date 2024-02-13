@@ -49,3 +49,21 @@ func ToTypedSlice[T any](input []any) []T {
 	}
 	return res
 }
+
+// AppendSliceUnique appends elements from slice2 to slice1, omitting duplicates.
+func AppendSliceUnique[T comparable](slice1, slice2 []T) []T {
+	// Map existing elements of slice1 for quick lookup
+	exists := SliceToLookup(slice1)
+	result := make([]T, len(slice1))
+	copy(result, slice1)
+
+	// Check each element in slice2; if not a duplicate, append it to the result
+	for _, item := range slice2 {
+		if _, dupe := exists[item]; !dupe {
+			result = append(result, item)
+			exists[item] = struct{}{}
+		}
+	}
+
+	return result
+}

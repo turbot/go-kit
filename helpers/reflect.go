@@ -76,8 +76,8 @@ func DereferencePointer(val interface{}) interface{} {
 }
 
 /*
-	TODO: add support for multi-dimensional arrays
- 	like - arr[1][2] arr[1][2][3] and so on..
+		TODO: add support for multi-dimensional arrays
+	 	like - arr[1][2] arr[1][2][3] and so on..
 */
 func IsFieldArray(fieldName string) (string, int, bool) {
 	r := regexp.MustCompile(`^(.*)\[(\d+)\]$`)
@@ -145,4 +145,29 @@ func ExecuteMethod(item interface{}, methodName string) (returnValues []interfac
 		}
 	}
 	return
+}
+
+// StructToMap uses reflection to convert a struct to a map
+func StructToMap(s any) map[string]any {
+	result := make(map[string]any)
+	val := reflect.ValueOf(s)
+
+	// We only accept structs
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.Struct {
+		fmt.Println("Expecting a struct")
+		return nil
+	}
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		value := val.Field(i).Interface()
+
+		result[field.Name] = value
+	}
+
+	return result
 }
