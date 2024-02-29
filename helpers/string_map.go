@@ -11,13 +11,3 @@ func MergeStringMaps(a, b map[string]string) map[string]string {
 	}
 	return dst
 }
-
-// CloneStringMap :: clone a string map - return a copy of the map
-func CloneStringMap(src map[string]string) map[string]string {
-	var dst = make(map[string]string)
-
-	for k, v := range src {
-		dst[k] = v
-	}
-	return dst
-}

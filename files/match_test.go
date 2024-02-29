@@ -1,7 +1,7 @@
 package files
 
 import (
-	"github.com/turbot/go-kit/helpers"
+	"slices"
 	"testing"
 )
 
@@ -125,7 +125,7 @@ var matchTests = map[string]matchTestCase{
 func TestMatch(t *testing.T) {
 	var testNames = []string{}
 	for name, test := range matchTests {
-		if len(testNames) > 0 && !helpers.StringSliceContains(testNames, name) {
+		if len(testNames) > 0 && !slices.Contains(testNames, name) {
 			continue
 		}
 		actual := Match(test.pattern, test.file)
