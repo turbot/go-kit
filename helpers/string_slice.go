@@ -1,92 +1,89 @@
 package helpers
 
 import (
-	"sort"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
+	"slices"
 )
 
 func StringSliceEqualIgnoreOrder(a, b []string) bool {
-	less := func(a, b string) bool { return a < b }
-	return cmp.Diff(a, b, cmpopts.SortSlices(less)) == ""
-
-}
-
-// StringSliceContains returns whether the string slice contains the given string
-func StringSliceContains(slice []string, val string) bool {
-	for _, item := range slice {
-		if item == val {
-			return true
-		}
+	if len(a) != len(b) {
+		return false
 	}
-	return false
+	slices.Sort(a)
+	slices.Sort(b)
+	return slices.Equal(a, b)
 }
 
-// StringSliceDiff returns values which only exists in the fist string slice
-func StringSliceDiff(slice1, slice2 []string) (onlyInSlice1 []string) {
-	onlyInSlice1 = []string{}
+// StringSliceDiff finds elements in slice1 that are not in slice2.
+func StringSliceDiff(slice1, slice2 []string) []string {
 	if len(slice1) == 0 {
-		return
+		return []string{} // Return an empty slice instead of nil
 	}
 	if len(slice2) == 0 {
-		onlyInSlice1 = slice1
-		return
+		return slices.Clone(slice1) // Return copy to preserve input order
 	}
 
-	sort.Strings(slice1)
-	sort.Strings(slice2)
+	// Convert slice2 into a map for O(1) lookups
+	set := make(map[string]struct{}, len(slice2))
+	for _, v := range slice2 {
+		set[v] = struct{}{}
+	}
 
-	idx := 0
-	for _, item := range slice1 {
-		// ignore empty
-		if item == "" {
-			continue
-		}
-
-		for slice2[idx] < item && idx+1 < len(slice2) {
-			idx++
-		}
-		if slice2[idx] != item {
-			onlyInSlice1 = append(onlyInSlice1, item)
+	// Collect items from slice1 that aren't in slice2
+	var onlyInSlice1 []string
+	for _, v := range slice1 {
+		if _, found := set[v]; !found && v != "" {
+			onlyInSlice1 = append(onlyInSlice1, v)
 		}
 	}
-	return
+
+	// Ensure we return an empty slice instead of nil
+	if onlyInSlice1 == nil {
+		return []string{}
+	}
+	return onlyInSlice1
 }
 
-// RemoveFromStringSlice removes the given string from the string slice
+// RemoveFromStringSlice removes the given values from the slice.
 func RemoveFromStringSlice(slice []string, values ...string) []string {
-	var res []string
-	for _, item := range slice {
-		var remove bool
-		for _, value := range values {
-			if item == value {
-				remove = true
-				break
-			}
-		}
-		if !remove {
-			res = append(res, item)
-		}
+	// Convert values to a set for O(1) lookups
+	removeSet := make(map[string]struct{}, len(values))
+	for _, v := range values {
+		removeSet[v] = struct{}{}
 	}
-	return res
+
+	// Use slices.DeleteFunc to filter
+	return slices.DeleteFunc(slice, func(item string) bool {
+		_, found := removeSet[item]
+		return found
+	})
 }
 
-// StringSliceDistinct returns a slice with the unique elements the input string slice
 func StringSliceDistinct(slice []string) []string {
+	if len(slice) == 0 {
+		return []string{} // Ensure empty slice instead of nil
+	}
+
+	seen := make(map[string]struct{}, len(slice))
 	var res []string
-	countMap := make(map[string]int)
-	for _, item := range slice {
-		countMap[item]++
-		// if this is the first time we have come across this item, add to res
-		if countMap[item] == 1 {
-			res = append(res, item)
+
+	for _, v := range slice {
+		if _, exists := seen[v]; !exists {
+			seen[v] = struct{}{}
+			res = append(res, v)
 		}
 	}
+
 	return res
 }
 
 // StringSliceHasDuplicates returns whether a string slice has duplicate elements
 func StringSliceHasDuplicates(slice []string) bool {
-	return len(slice) > len(StringSliceDistinct(slice))
+	seen := make(map[string]struct{}, len(slice))
+	for _, item := range slice {
+		if _, exists := seen[item]; exists {
+			return true // Found a duplicate early
+		}
+		seen[item] = struct{}{}
+	}
+	return false
 }

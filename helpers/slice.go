@@ -2,64 +2,63 @@ package helpers
 
 import (
 	"reflect"
-	"time"
 )
 
-// AnySliceToTypedSlice determines whether input is []any and if so converts to an array of the underlying type
+// AnySliceToTypedSlice converts a slice of `any` (`[]interface{}`) into a strongly typed slice
+// If mixed types are detected, it returns the original `[]any` to prevent panics.
 func AnySliceToTypedSlice(input any) any {
-	result := input
-	switch result.(type) { //nolint:gocritic // TODO fix this gocritic lint suggestion
-	case []any:
-		val := reflect.ValueOf(result)
-		if val.Kind() == reflect.Slice {
-			if val.Len() == 0 {
-				// if array is empty we cannot know the underlying type
-				// just return empty string array
-				result = []string{}
-			} else {
-				// convert into an array of the appropriate type
-				elem := val.Index(0).Interface()
-				switch elem.(type) {
-				case int16:
-					result = ToTypedSlice[int16](result.([]any))
-				case int32:
-					result = ToTypedSlice[int32](result.([]any))
-				case int64:
-					result = ToTypedSlice[int64](result.([]any))
-				case float32:
-					result = ToTypedSlice[float32](result.([]any))
-				case float64:
-					result = ToTypedSlice[float64](result.([]any))
-				case string:
-					result = ToTypedSlice[string](result.([]any))
-				case time.Time:
-					result = ToTypedSlice[time.Time](result.([]any))
-				}
-			}
+	val := reflect.ValueOf(input)
+
+	// If input is NOT a slice, return it unchanged
+	if val.Kind() != reflect.Slice {
+		return input
+	}
+
+	// Handle empty slices safely
+	if val.Len() == 0 {
+		return []string{} // Default empty slice type
+	}
+
+	// Detect if the slice has mixed types
+	elemType := reflect.TypeOf(val.Index(0).Interface())
+	for i := 1; i < val.Len(); i++ {
+		if reflect.TypeOf(val.Index(i).Interface()) != elemType {
+			return input // 🚨 Mixed types detected, return as []any
 		}
 	}
-	return result
-}
 
-// ToTypedSlice converts []any to []T
-func ToTypedSlice[T any](input []any) []T {
-	res := make([]T, len(input))
-	for i, val := range input {
-		res[i] = val.(T)
+	// Create a new slice of the inferred type
+	typedSlice := reflect.MakeSlice(reflect.SliceOf(elemType), val.Len(), val.Len())
+
+	// Convert elements and set them properly
+	for i := 0; i < val.Len(); i++ {
+		item := val.Index(i).Interface()
+
+		// Convert item explicitly to the correct type
+		convertedItem := reflect.ValueOf(item).Convert(elemType)
+
+		// Now set it safely
+		typedSlice.Index(i).Set(convertedItem)
 	}
-	return res
+
+	return typedSlice.Interface()
 }
 
-// AppendSliceUnique appends elements from slice2 to slice1, omitting duplicates.
+// AppendSliceUnique appends elements from slice2 to slice1, ensuring uniqueness.
 func AppendSliceUnique[T comparable](slice1, slice2 []T) []T {
-	// Map existing elements of slice1 for quick lookup
-	exists := SliceToLookup(slice1)
-	result := make([]T, len(slice1))
-	copy(result, slice1)
+	// Create a map for fast lookup (O(1) average time complexity)
+	exists := make(map[T]struct{}, len(slice1)+len(slice2))
 
-	// Check each element in slice2; if not a duplicate, append it to the result
+	// Copy slice1 into result and mark existing elements
+	result := make([]T, 0, len(slice1)+len(slice2))
+	for _, item := range slice1 {
+		result = append(result, item)
+		exists[item] = struct{}{}
+	}
+
+	// Append only unique items from slice2
 	for _, item := range slice2 {
-		if _, dupe := exists[item]; !dupe {
+		if _, found := exists[item]; !found {
 			result = append(result, item)
 			exists[item] = struct{}{}
 		}

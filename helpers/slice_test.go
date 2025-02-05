@@ -103,11 +103,6 @@ func TestAnySliceToTypedSlice(t *testing.T) {
 			want: []int{42}, // Should infer as []int
 		},
 		{
-			name: "Convert mixed-type []any should remain unchanged",
-			args: args{input: []any{"apple", 1, 2.3}},
-			want: []any{"apple", 1, 2.3}, // If types are mixed, no conversion should happen
-		},
-		{
 			name: "Convert non-slice input should remain unchanged",
 			args: args{input: "not a slice"},
 			want: "not a slice", // If not a slice, should return as-is
@@ -137,11 +132,139 @@ func TestAnySliceToTypedSlice(t *testing.T) {
 			args: args{input: []any{byte(65), byte(66), byte(67)}},
 			want: []byte{65, 66, 67}, // Should recognize byte values
 		},
+		{name: "Non-slice: string input",
+			args: args{input: "not a slice"},
+			want: "not a slice", // ✅ Should return unchanged
+		},
+		{
+			name: "Non-slice: int input",
+			args: args{input: 123},
+			want: 123, // ✅ Should return unchanged
+		},
+		{
+			name: "Non-slice: float64 input",
+			args: args{input: 45.67},
+			want: 45.67, // ✅ Should return unchanged
+		},
+		{
+			name: "Non-slice: map input",
+			args: args{input: map[string]int{"key": 1}},
+			want: map[string]int{"key": 1}, // ✅ Should return unchanged
+		},
+		{
+			name: "Non-slice: struct input",
+			args: args{input: struct{ Name string }{"Alice"}},
+			want: struct{ Name string }{"Alice"}, // ✅ Should return unchanged
+		},
+		{
+			name: "Non-slice: nil input",
+			args: args{input: nil},
+			want: nil, // ✅ Should return nil
+		},
+		{
+			name: "Convert mixed-type []any should remain unchanged",
+			args: args{input: []any{"apple", 1, 2.3}},
+			want: []any{"apple", 1, 2.3}, // If types are mixed, no conversion should happen
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equalf(t, tt.want, AnySliceToTypedSlice(tt.args.input), "AnySliceToTypedSlice(%v)", tt.args.input)
+		})
+	}
+}
+
+func TestAppendSliceUnique(t *testing.T) {
+	// Test cases for integers
+	intTests := []struct {
+		name   string
+		slice1 []int
+		slice2 []int
+		want   []int
+	}{
+		{
+			name:   "No duplicates, simple append",
+			slice1: []int{1, 2, 3},
+			slice2: []int{4, 5},
+			want:   []int{1, 2, 3, 4, 5},
+		},
+		{
+			name:   "With duplicates, avoid adding again",
+			slice1: []int{1, 2, 3},
+			slice2: []int{3, 4, 5},
+			want:   []int{1, 2, 3, 4, 5},
+		},
+		{
+			name:   "Appending empty slice",
+			slice1: []int{1, 2, 3},
+			slice2: []int{},
+			want:   []int{1, 2, 3},
+		},
+		{
+			name:   "Appending to empty slice",
+			slice1: []int{},
+			slice2: []int{1, 2, 3},
+			want:   []int{1, 2, 3},
+		},
+		{
+			name:   "Both slices empty",
+			slice1: []int{},
+			slice2: []int{},
+			want:   []int{},
+		},
+	}
+
+	// Run tests for integers
+	for _, tt := range intTests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, AppendSliceUnique(tt.slice1, tt.slice2), "AppendSliceUnique(%v, %v)", tt.slice1, tt.slice2)
+		})
+	}
+
+	// Test cases for strings
+	stringTests := []struct {
+		name   string
+		slice1 []string
+		slice2 []string
+		want   []string
+	}{
+		{
+			name:   "No duplicates in strings",
+			slice1: []string{"apple", "banana"},
+			slice2: []string{"cherry", "date"},
+			want:   []string{"apple", "banana", "cherry", "date"},
+		},
+		{
+			name:   "With duplicate strings",
+			slice1: []string{"apple", "banana"},
+			slice2: []string{"banana", "cherry"},
+			want:   []string{"apple", "banana", "cherry"},
+		},
+		{
+			name:   "Empty second slice",
+			slice1: []string{"apple", "banana"},
+			slice2: []string{},
+			want:   []string{"apple", "banana"},
+		},
+		{
+			name:   "Empty first slice",
+			slice1: []string{},
+			slice2: []string{"apple", "banana"},
+			want:   []string{"apple", "banana"},
+		},
+		{
+			name:   "Both slices empty",
+			slice1: []string{},
+			slice2: []string{},
+			want:   []string{},
+		},
+	}
+
+	// Run tests for strings
+	for _, tt := range stringTests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, AppendSliceUnique(tt.slice1, tt.slice2), "AppendSliceUnique(%v, %v)", tt.slice1, tt.slice2)
 		})
 	}
 }
