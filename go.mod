@@ -8,7 +8,7 @@ require (
 	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/tkrajina/go-reflector v0.5.6
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 )
