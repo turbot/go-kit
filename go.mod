@@ -9,7 +9,7 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tkrajina/go-reflector v0.5.6
+	github.com/tkrajina/go-reflector v0.5.8
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 )
 
