@@ -1,9 +1,16 @@
 
 
-## v0.10.0 [tbd]
+## v1.0.0 [2025-02-06]
+_Breaking changes_
+* Remove `MergeMaps`
+* Remove `MergeStringMaps`
+* Remove `CloneStringMap`
+
 _What's new?_
 * Add `helpers.AppendSliceUnique`. ([#86](https://github.com/turbot/go-kit/issues/86))
-
+* Add ByteMapToStringMap
+ 
+ 
 ## v0.9.0 [2023-12-18]
 _What's new?_
 * Add `ListFilesWithContext` function to handle context cancellations.([#70](https://github.com/turbot/go-kit/issues/70))
