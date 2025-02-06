@@ -1,28 +1,29 @@
 package helpers
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
 
-func CombineErrorsWithPrefix(prefix string, errors ...error) error {
-	if len(errors) == 0 {
+func CombineErrorsWithPrefix(prefix string, errorList ...error) error {
+	if len(errorList) == 0 {
 		return nil
 	}
 
-	if len(errors) == 1 {
+	if len(errorList) == 1 {
 		if len(prefix) == 0 {
-			return errors[0]
+			return errorList[0]
 		} else {
-			return fmt.Errorf("%s - %s", prefix, errors[0].Error())
+			return fmt.Errorf("%s - %s", prefix, errorList[0].Error())
 		}
 	}
 
 	combinedErrorString := []string{prefix}
-	for _, e := range errors {
+	for _, e := range errorList {
 		combinedErrorString = append(combinedErrorString, e.Error())
 	}
-	return fmt.Errorf(strings.Join(combinedErrorString, "\n\t"))
+	return errors.New(strings.Join(combinedErrorString, "\n\t"))
 }
 
 func CombineErrors(errors ...error) error {

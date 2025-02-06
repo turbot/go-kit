@@ -50,6 +50,7 @@ func (w *RotatingLogWriter) Write(p []byte) (n int, err error) {
 		w.currentWriter, err = os.OpenFile(w.currentPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			err = fmt.Errorf("failed to open steampipe log file: %s", err.Error())
+			return 0, err
 		}
 	}
 

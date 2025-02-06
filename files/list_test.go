@@ -261,11 +261,11 @@ var testCasesListFiles = map[string]listFilesTest{
 		},
 		preRun: func() {
 			// create an empty directory
-			os.Mkdir(filepath.Join(wd, "test_data/list_test3/a/empty"), 0644)
+			_ = os.Mkdir(filepath.Join(wd, "test_data/list_test3/a/empty"), 0644)
 		},
 		postRun: func() {
 			// remove empty directory
-			os.RemoveAll(filepath.Join(wd, "test_data/list_test3/a/empty"))
+			_ = os.RemoveAll(filepath.Join(wd, "test_data/list_test3/a/empty"))
 		},
 		expected: []string{
 			"test_data/list_test3/.steampipe",
@@ -286,7 +286,7 @@ var testCasesListFiles = map[string]listFilesTest{
 		},
 		preRun: func() {
 			// create an empty directory
-			os.Mkdir(filepath.Join(wd, "test_data/list_test3/a/empty"), 0644)
+			_ = os.Mkdir(filepath.Join(wd, "test_data/list_test3/a/empty"), 0644)
 		},
 		postRun: func() {
 			// remove empty directory

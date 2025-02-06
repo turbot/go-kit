@@ -21,7 +21,6 @@ type typeCheckInput struct {
 	_uint64  uint64
 	_float32 float32
 	_float64 float64
-	_byte    byte // is this required as it's an alias for uint8?
 	_bool    bool
 	_slice   []string
 	_array   [3]string
