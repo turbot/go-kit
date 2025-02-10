@@ -202,7 +202,7 @@ var testCasesParseTime = []parseTimeTest{
 	{
 		name:     "RFC1123ZWithOffset",
 		input:    "Sat, 10 Feb 2024 15:04:05 +0100",
-		expected: time.Date(2024, 2, 10, 14, 4, 5, 0, time.FixedZone("+0100", 1*60*60)),
+		expected: time.Date(2024, 2, 10, 15, 4, 5, 0, time.FixedZone("+0100", 1*60*60)),
 		wantErr:  false,
 	},
 	{
