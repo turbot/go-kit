@@ -140,3 +140,8 @@ func TrimBlankLines(str string) string {
 	strippedLines := RemoveFromStringSlice(lines, "")
 	return strings.Join(strippedLines, "\n")
 }
+
+// IsOnlyNumeric returns true if the string only contains numeric characters
+func IsOnlyNumeric(s string) bool {
+	return strings.Trim(s, "0123456789") == ""
+}
