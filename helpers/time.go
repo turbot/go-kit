@@ -29,6 +29,8 @@ func ParseTime(input string) (*time.Time, error) {
 		"2006/01/02 15:04:05 -0700",  // ISO-like format with different separator and offset
 		"2006/01/02 15:04:05 MST",    // ISO-like format with different separator and named timezone
 		time.DateOnly,                // "2006-01-02" (Date-only format)
+		"2006-01-02T15:04:05",        // ISO 8601 datetime
+		"2006-01-02T15:04:05.000",    // ISO 8601 datetime with milliseconds
 	}
 
 	var t time.Time
