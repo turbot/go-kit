@@ -1,4 +1,6 @@
-
+## v1.1.0 [2025-02-20]
+_What's new?_
+* Add `ParseTime` helper function to parse various strings into `time.Time`. ([#92](https://github.com/turbot/go-kit/issues/92))
 
 ## v1.0.0 [2025-02-06]
 _Breaking changes_
