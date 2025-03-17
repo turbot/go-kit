@@ -1,6 +1,10 @@
+## v1.2.0 [2025-03-17]
+_Bug fixes_
+* Fix `ParseTime` helper to return `time.Time` instead of `*time.Time`.  ([#95](https://github.com/turbot/go-kit/issues/95))
+
 ## v1.1.0 [2025-02-20]
 _What's new?_
-* Add `ParseTime` helper function to parse various strings into `time.Time`. ([#92](https://github.com/turbot/go-kit/issues/92))
+* Add `ParseTime` helper function to parse various strings into `*time.Time`. ([#92](https://github.com/turbot/go-kit/issues/92))
 
 ## v1.0.0 [2025-02-06]
 _Breaking changes_
