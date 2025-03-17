@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-// ParseTime parses a string into a *time.Time object attempting to parse it as a variety of formats
-func ParseTime(input string) (*time.Time, error) {
+// ParseTime parses a string into a time.Time object attempting to parse it as a variety of formats
+func ParseTime(input string) (time.Time, error) {
 	var timeFormats = []string{
 		time.RFC3339Nano,             // "2006-01-02T15:04:05.999999999Z07:00"
 		time.RFC3339,                 // "2006-01-02T15:04:05Z07:00"
@@ -44,13 +44,13 @@ func ParseTime(input string) (*time.Time, error) {
 			switch len(input) {
 			case 9, 10:
 				t = time.Unix(unixTime, 0) // Unix seconds
-				return &t, nil
+				return t, nil
 			case 12, 13:
 				t = time.UnixMilli(unixTime) // Unix milliseconds
-				return &t, nil
+				return t, nil
 			case 18, 19:
 				t = time.Unix(0, unixTime) // Unix nanoseconds
-				return &t, nil
+				return t, nil
 			}
 		}
 	}
@@ -63,11 +63,11 @@ func ParseTime(input string) (*time.Time, error) {
 			if strings.Contains(timeFormat, "MST") {
 				t = adjustToNamedTimezone(t, input)
 			}
-			return &t, nil
+			return t, nil
 		}
 	}
 
-	return nil, fmt.Errorf("unrecognized timestamp format: %s", input)
+	return time.Time{}, fmt.Errorf("unrecognized timestamp format: %s", input)
 }
 
 func adjustToNamedTimezone(t time.Time, originalTs string) time.Time {
