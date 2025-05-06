@@ -1,3 +1,7 @@
+## v1.3.0 [2025-05-06]
+_What's new?_
+* Add `ToHumanisedString` func to make values more readable.
+
 ## v1.2.0 [2025-03-17]
 _Bug fixes_
 * Fix `ParseTime` helper to return `time.Time` instead of `*time.Time`.  ([#95](https://github.com/turbot/go-kit/issues/95))

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/btubbs/datetime"
+	"github.com/dustin/go-humanize"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -103,6 +104,63 @@ func ToString(x interface{}) string {
 	}
 	// fall back to sprintf
 	return fmt.Sprintf("%+v", x)
+}
+
+// ToHumanisedString converts most types value to a humanised string
+func ToHumanisedString(x interface{}) string {
+	switch v := x.(type) {
+	case *int8:
+		return humanize.Comma(int64(Int8Value(v)))
+	case *int16:
+		return humanize.Comma(int64(Int16Value(v)))
+	case *int32:
+		return humanize.Comma(int64(Int32Value(v)))
+	case *int64:
+		return humanize.Comma(Int64Value(v))
+	case *int:
+		return humanize.Comma(int64(IntValue(v)))
+	case *uint8:
+		return humanize.Comma(int64(Uint8Value(v)))
+	case *uint16:
+		return humanize.Comma(int64(Uint16Value(v)))
+	case *uint32:
+		return humanize.Comma(int64(Uint32Value(v)))
+	case *uint64:
+		return humanize.Comma(int64(Uint64Value(v)))
+	case *uint:
+		return humanize.Comma(int64(UintValue(v)))
+	case *float32:
+		return humanize.Commaf(float64(Float32Value(v)))
+	case *float64:
+		return humanize.Commaf(Float64Value(v))
+	case float64:
+		return humanize.Commaf(v)
+	case float32:
+		return humanize.Commaf(float64(v))
+	case int8:
+		return humanize.Comma(int64(v))
+	case int16:
+		return humanize.Comma(int64(v))
+	case int32:
+		return humanize.Comma(int64(v))
+	case int:
+		return humanize.Comma(int64(v))
+	case int64:
+		return humanize.Comma(v)
+	case uint8:
+		return humanize.Comma(int64(v))
+	case uint16:
+		return humanize.Comma(int64(v))
+	case uint32:
+		return humanize.Comma(int64(v))
+	case uint64:
+		return humanize.Comma(int64(v))
+	case uint:
+		return humanize.Comma(int64(v))
+	default:
+		// call ToString to get a string representation of the value
+		return ToString(v)
+	}
 }
 
 // FloatToString converts interface to a string representation of a float.

@@ -55,19 +55,19 @@ type numberConversionInput struct {
 }
 
 var numberConversionInputData = numberConversionInput{
-	int64(100),
-	int32(100),
-	int32(100),
+	int64(1234567),
+	int32(1234567),
+	int32(1234567),
 	int8(100),
-	int(100),
-	uint64(100),
-	uint32(100),
-	uint16(100),
+	int(1234567),
+	uint64(1234567),
+	uint32(1234567),
+	uint16(12345),
 	uint8(100),
-	uint(100),
+	uint(1234567),
 	byte(100),
-	float64(100.12345678),
-	float32(100.1234),
+	float64(1234.12345678),
+	float32(1234.1234),
 	true,
 	false,
 	"true",
@@ -77,13 +77,13 @@ var numberConversionInputData = numberConversionInput{
 	"false",
 	"off",
 	"disabled",
-	"100",
-	"100.12345678",
+	"1234567",
+	"1234567.12345678",
 	"invalid",
 	map[string]string{
 		"a": "b",
 	},
-	1,
+	1234567,
 	structType{"A"},
 	enumType_a,
 }
@@ -104,35 +104,42 @@ func executeToStringTest(t *testing.T, test numberConversionTest, conv toStringF
 }
 
 var testCasesToString = []numberConversionTest{
-	{"int64", numberConversionInputData._int64, "100"},
-	{"int32", numberConversionInputData._int32, "100"},
-	{"int16", numberConversionInputData._int16, "100"},
+	{"int64", numberConversionInputData._int64, "1234567"},
+	{"int32", numberConversionInputData._int32, "1234567"},
+	{"int16", numberConversionInputData._int16, "1234567"},
 	{"int8", numberConversionInputData._int8, "100"},
-	{"int", numberConversionInputData._int, "100"},
-	{"uint64", numberConversionInputData._uint64, "100"},
-	{"uint32", numberConversionInputData._uint32, "100"},
-	{"uint16", numberConversionInputData._uint16, "100"},
+	{"int", numberConversionInputData._int, "1234567"},
+	{"uint64", numberConversionInputData._uint64, "1234567"},
+	{"uint32", numberConversionInputData._uint32, "1234567"},
+	{"uint16", numberConversionInputData._uint16, "12345"},
 	{"uint8", numberConversionInputData._uint8, "100"},
-	{"uint", numberConversionInputData._uint, "100"},
+	{"uint", numberConversionInputData._uint, "1234567"},
 	{"byte", numberConversionInputData._byte, "100"},
-	{"float64", numberConversionInputData._float64, "100.12345678"},
-	{"float32", numberConversionInputData._float32, "100.1234"},
-	{"*int64", &numberConversionInputData._int64, "100"},
-	{"*int32", &numberConversionInputData._int32, "100"},
-	{"*int16", &numberConversionInputData._int16, "100"},
+	{"float64", numberConversionInputData._float64, "1234.12345678"},
+	{"float32", numberConversionInputData._float32, "1234.1234"},
+	{"*int64", &numberConversionInputData._int64, "1234567"},
+	{"*int32", &numberConversionInputData._int32, "1234567"},
+	{"*int16", &numberConversionInputData._int16, "1234567"},
 	{"*int8", &numberConversionInputData._int8, "100"},
-	{"*int", &numberConversionInputData._int, "100"},
-	{"*uint64", &numberConversionInputData._uint64, "100"},
-	{"*uint32", &numberConversionInputData._uint32, "100"},
-	{"*uint16", &numberConversionInputData._uint16, "100"},
+	{"*int", &numberConversionInputData._int, "1234567"},
+	{"*uint64", &numberConversionInputData._uint64, "1234567"},
+	{"*uint32", &numberConversionInputData._uint32, "1234567"},
+	{"*uint16", &numberConversionInputData._uint16, "12345"},
 	{"*uint8", &numberConversionInputData._uint8, "100"},
-	{"*uint", &numberConversionInputData._uint, "100"},
+	{"*uint", &numberConversionInputData._uint, "1234567"},
 	{"*byte", &numberConversionInputData._byte, "100"},
-	{"*float64 ", &numberConversionInputData._float64, "100.12345678"},
-	{"*float32", &numberConversionInputData._float32, "100.1234"},
+	{"*float64", &numberConversionInputData._float64, "1234.12345678"},
+	{"*float32", &numberConversionInputData._float32, "1234.1234"},
 	{"map", numberConversionInputData._map, "map[a:b]"},
 	{"struct", numberConversionInputData._struct, "{a:A}"},
 	{"enum", numberConversionInputData._enum, "a-val"},
+
+	// Nil pointer cases
+	{"nil *string", (*string)(nil), ""},
+	{"nil *bool", (*bool)(nil), "<nil>"},
+	{"nil *int", (*int)(nil), "0"},
+	{"nil *float64", (*float64)(nil), "0"},
+	{"nil *time.Time", (*time.Time)(nil), ""},
 }
 
 func TestToString(t *testing.T) {
@@ -153,8 +160,8 @@ var testCasesFloatToString = []numberConversionTest{
 	{"uint8", numberConversionInputData._uint8, "PANIC"},
 	{"uint", numberConversionInputData._uint, "PANIC"},
 	{"byte", numberConversionInputData._byte, "PANIC"},
-	{"float64", numberConversionInputData._float64, "100.12345678"},
-	{"float32", numberConversionInputData._float32, "100.1234"},
+	{"float64", numberConversionInputData._float64, "1234.12345678"},
+	{"float32", numberConversionInputData._float32, "1234.1234"},
 	{"*int64", &numberConversionInputData._int64, "PANIC"},
 	{"*int32", &numberConversionInputData._int32, "PANIC"},
 	{"*int16", &numberConversionInputData._int16, "PANIC"},
@@ -166,10 +173,10 @@ var testCasesFloatToString = []numberConversionTest{
 	{"*uint8", &numberConversionInputData._uint8, "PANIC"},
 	{"*uint", &numberConversionInputData._uint, "PANIC"},
 	{"*byte", &numberConversionInputData._byte, "PANIC"},
-	{"*float64 ", &numberConversionInputData._float64, "100.12345678"},
-	{"*float32", &numberConversionInputData._float32, "100.1234"},
+	{"*float64", &numberConversionInputData._float64, "1234.12345678"},
+	{"*float32", &numberConversionInputData._float32, "1234.1234"},
 	{"map", numberConversionInputData._map, "PANIC"},
-	{"floatAsString", numberConversionInputData._float_as_string, "100.12345678"},
+	{"floatAsString", numberConversionInputData._float_as_string, "1234567.12345678"},
 }
 
 func TestFloatToString(t *testing.T) {
@@ -179,34 +186,34 @@ func TestFloatToString(t *testing.T) {
 }
 
 var testCasesIntToString = []numberConversionTest{
-	{"int64", numberConversionInputData._int64, "100"},
-	{"int32", numberConversionInputData._int32, "100"},
-	{"int16", numberConversionInputData._int16, "100"},
+	{"int64", numberConversionInputData._int64, "1234567"},
+	{"int32", numberConversionInputData._int32, "1234567"},
+	{"int16", numberConversionInputData._int16, "1234567"},
 	{"int8", numberConversionInputData._int8, "100"},
-	{"int", numberConversionInputData._int, "100"},
-	{"uint64", numberConversionInputData._uint64, "100"},
-	{"uint32", numberConversionInputData._uint32, "100"},
-	{"uint16", numberConversionInputData._uint16, "100"},
+	{"int", numberConversionInputData._int, "1234567"},
+	{"uint64", numberConversionInputData._uint64, "1234567"},
+	{"uint32", numberConversionInputData._uint32, "1234567"},
+	{"uint16", numberConversionInputData._uint16, "12345"},
 	{"uint8", numberConversionInputData._uint8, "100"},
-	{"uint", numberConversionInputData._uint, "100"},
+	{"uint", numberConversionInputData._uint, "1234567"},
 	{"byte", numberConversionInputData._byte, "100"},
 	{"float64", numberConversionInputData._float64, "PANIC"},
 	{"float32", numberConversionInputData._float32, "PANIC"},
-	{"*int64", &numberConversionInputData._int64, "100"},
-	{"*int32", &numberConversionInputData._int32, "100"},
-	{"*int16", &numberConversionInputData._int16, "100"},
+	{"*int64", &numberConversionInputData._int64, "1234567"},
+	{"*int32", &numberConversionInputData._int32, "1234567"},
+	{"*int16", &numberConversionInputData._int16, "1234567"},
 	{"*int8", &numberConversionInputData._int8, "100"},
-	{"*int", &numberConversionInputData._int, "100"},
-	{"*uint64", &numberConversionInputData._uint64, "100"},
-	{"*uint32", &numberConversionInputData._uint32, "100"},
-	{"*uint16", &numberConversionInputData._uint16, "100"},
+	{"*int", &numberConversionInputData._int, "1234567"},
+	{"*uint64", &numberConversionInputData._uint64, "1234567"},
+	{"*uint32", &numberConversionInputData._uint32, "1234567"},
+	{"*uint16", &numberConversionInputData._uint16, "12345"},
 	{"*uint8", &numberConversionInputData._uint8, "100"},
-	{"*uint", &numberConversionInputData._uint, "100"},
+	{"*uint", &numberConversionInputData._uint, "1234567"},
 	{"*byte", &numberConversionInputData._byte, "100"},
-	{"*float64 ", &numberConversionInputData._float64, "PANIC"},
+	{"*float64", &numberConversionInputData._float64, "PANIC"},
 	{"*float32", &numberConversionInputData._float32, "PANIC"},
 	{"map", numberConversionInputData._map, "PANIC"},
-	{"intAsString", numberConversionInputData._int_as_string, "100"},
+	{"intAsString", numberConversionInputData._int_as_string, "1234567"},
 	{"floatAsString", numberConversionInputData._float_as_string, "PANIC"},
 }
 
@@ -294,9 +301,9 @@ var testCasesToInt64 = []numberConversionTest{
 	{"int 32", numberConversionInputData._int32, int64(numberConversionInputData._int32)},
 	{"int 64", numberConversionInputData._int64, numberConversionInputData._int64},
 	{"int", numberConversionInputData._int, int64(numberConversionInputData._int)},
-	{"int as string", numberConversionInputData._int_as_string, int64(100)},
+	{"int as string", numberConversionInputData._int_as_string, int64(1234567)},
 	{"uint 8", numberConversionInputData._uint8, int64(numberConversionInputData._uint8)},
-	{"float", numberConversionInputData._float64, int64(100)},
+	{"float", numberConversionInputData._float64, int64(1234)},
 	{"invalid string", "FOO", "ERROR"},
 }
 
@@ -325,7 +332,7 @@ var testCasesToFloat64 = []numberConversionTest{
 	{"float 32", numberConversionInputData._float32, float64(numberConversionInputData._float32)},
 	{"int 64", numberConversionInputData._int64, float64(numberConversionInputData._int64)},
 	{"float 64", numberConversionInputData._float64, numberConversionInputData._float64},
-	{"float as string", numberConversionInputData._float_as_string, float64(100.12345678)},
+	{"float as string", numberConversionInputData._float_as_string, float64(1234567.12345678)},
 	{"invalid string", "FOO", "ERROR"},
 }
 
@@ -1871,5 +1878,59 @@ func TestMillisecondsTimeValue(t *testing.T) {
 		if e, a := testCase.outMillis, out; e != a {
 			t.Errorf("Unexpected value for time value at %d", idx)
 		}
+	}
+}
+
+var testCasesToHumanisedString = []numberConversionTest{
+	// Basic number cases with humanisation
+	{"int64", numberConversionInputData._int64, "1,234,567"},
+	{"int32", numberConversionInputData._int32, "1,234,567"},
+	{"int16", numberConversionInputData._int16, "1,234,567"},
+	{"int8", numberConversionInputData._int8, "100"},
+	{"int", numberConversionInputData._int, "1,234,567"},
+	{"uint64", numberConversionInputData._uint64, "1,234,567"},
+	{"uint32", numberConversionInputData._uint32, "1,234,567"},
+	{"uint16", numberConversionInputData._uint16, "12,345"},
+	{"uint8", numberConversionInputData._uint8, "100"},
+	{"uint", numberConversionInputData._uint, "1,234,567"},
+	{"byte", numberConversionInputData._byte, "100"},
+	{"float64", numberConversionInputData._float64, "1,234.12345678"},
+	{"float32", numberConversionInputData._float32, "1,234.1234130859375"},
+
+	// Pointer cases with humanisation
+	{"*int64", &numberConversionInputData._int64, "1,234,567"},
+	{"*int32", &numberConversionInputData._int32, "1,234,567"},
+	{"*int16", &numberConversionInputData._int16, "1,234,567"},
+	{"*int8", &numberConversionInputData._int8, "100"},
+	{"*int", &numberConversionInputData._int, "1,234,567"},
+	{"*uint64", &numberConversionInputData._uint64, "1,234,567"},
+	{"*uint32", &numberConversionInputData._uint32, "1,234,567"},
+	{"*uint16", &numberConversionInputData._uint16, "12,345"},
+	{"*uint8", &numberConversionInputData._uint8, "100"},
+	{"*uint", &numberConversionInputData._uint, "1,234,567"},
+	{"*byte", &numberConversionInputData._byte, "100"},
+	{"*float64", &numberConversionInputData._float64, "1,234.12345678"},
+	{"*float32", &numberConversionInputData._float32, "1,234.1234130859375"},
+
+	// Nil pointer cases
+	{"nil *string", (*string)(nil), ""},
+	{"nil *bool", (*bool)(nil), "<nil>"},
+	{"nil *int", (*int)(nil), "0"},
+	{"nil *float64", (*float64)(nil), "0"},
+	{"nil *time.Time", (*time.Time)(nil), ""},
+
+	// Other types
+	{"string", "test", "test"},
+	{"bool", true, "true"},
+	{"time.Time", time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), "2024-01-01T00:00:00Z"},
+	{"[]byte", []byte("test"), "test"},
+	{"map", numberConversionInputData._map, "map[a:b]"},
+	{"struct", numberConversionInputData._struct, "{a:A}"},
+	{"enum", numberConversionInputData._enum, "a-val"},
+}
+
+func TestToHumanisedString(t *testing.T) {
+	for _, test := range testCasesToHumanisedString {
+		executeToStringTest(t, test, ToHumanisedString)
 	}
 }
