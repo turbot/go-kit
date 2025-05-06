@@ -109,12 +109,6 @@ func ToString(x interface{}) string {
 // ToHumanisedString converts most types value to a humanised string
 func ToHumanisedString(x interface{}) string {
 	switch v := x.(type) {
-	case *string:
-		return StringValue(v)
-	case *bool:
-		if v != nil {
-			return strconv.FormatBool(*v)
-		}
 	case *int8:
 		return humanize.Comma(int64(Int8Value(v)))
 	case *int16:
@@ -139,15 +133,6 @@ func ToHumanisedString(x interface{}) string {
 		return humanize.Commaf(float64(Float32Value(v)))
 	case *float64:
 		return humanize.Commaf(Float64Value(v))
-	case *time.Time:
-		if v != nil {
-			return v.Format(time.RFC3339)
-		}
-		return ""
-	case string:
-		return v
-	case bool:
-		return strconv.FormatBool(v)
 	case float64:
 		return humanize.Commaf(v)
 	case float32:
@@ -170,15 +155,12 @@ func ToHumanisedString(x interface{}) string {
 		return humanize.Comma(int64(v))
 	case uint64:
 		return humanize.Comma(int64(v))
-	case time.Time:
-		return v.Format(time.RFC3339)
 	case uint:
 		return humanize.Comma(int64(v))
-	case []byte:
-		return string(v)
+	default:
+		// call ToString to get a string representation of the value
+		return ToString(v)
 	}
-	// fall back to sprintf
-	return fmt.Sprintf("%+v", x)
 }
 
 // FloatToString converts interface to a string representation of a float.
