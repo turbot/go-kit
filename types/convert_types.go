@@ -116,29 +116,29 @@ func ToHumanisedString(x interface{}) string {
 			return strconv.FormatBool(*v)
 		}
 	case *int8:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(Int8Value(v)))
 	case *int16:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(Int16Value(v)))
 	case *int32:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(Int32Value(v)))
 	case *int64:
-		return humanize.Comma(*v)
+		return humanize.Comma(Int64Value(v))
 	case *int:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(IntValue(v)))
 	case *uint8:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(Uint8Value(v)))
 	case *uint16:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(Uint16Value(v)))
 	case *uint32:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(Uint32Value(v)))
 	case *uint64:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(Uint64Value(v)))
 	case *uint:
-		return humanize.Comma(int64(*v))
+		return humanize.Comma(int64(UintValue(v)))
 	case *float32:
-		return humanize.Commaf(float64(*v))
+		return humanize.Commaf(float64(Float32Value(v)))
 	case *float64:
-		return humanize.Commaf(*v)
+		return humanize.Commaf(Float64Value(v))
 	case *time.Time:
 		if v != nil {
 			return v.Format(time.RFC3339)
