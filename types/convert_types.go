@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/btubbs/datetime"
+	"github.com/dustin/go-humanize"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -98,6 +99,81 @@ func ToString(x interface{}) string {
 		return v.Format(time.RFC3339)
 	case uint:
 		return strconv.FormatUint(uint64(v), 10)
+	case []byte:
+		return string(v)
+	}
+	// fall back to sprintf
+	return fmt.Sprintf("%+v", x)
+}
+
+// ToHumanisedString converts most types value to a humanised string
+func ToHumanisedString(x interface{}) string {
+	switch v := x.(type) {
+	case *string:
+		return StringValue(v)
+	case *bool:
+		if v != nil {
+			return strconv.FormatBool(*v)
+		}
+	case *int8:
+		return humanize.Comma(int64(*v))
+	case *int16:
+		return humanize.Comma(int64(*v))
+	case *int32:
+		return humanize.Comma(int64(*v))
+	case *int64:
+		return humanize.Comma(*v)
+	case *int:
+		return humanize.Comma(int64(*v))
+	case *uint8:
+		return humanize.Comma(int64(*v))
+	case *uint16:
+		return humanize.Comma(int64(*v))
+	case *uint32:
+		return humanize.Comma(int64(*v))
+	case *uint64:
+		return humanize.Comma(int64(*v))
+	case *uint:
+		return humanize.Comma(int64(*v))
+	case *float32:
+		return humanize.Commaf(float64(*v))
+	case *float64:
+		return humanize.Commaf(*v)
+	case *time.Time:
+		if v != nil {
+			return v.Format(time.RFC3339)
+		}
+		return ""
+	case string:
+		return v
+	case bool:
+		return strconv.FormatBool(v)
+	case float64:
+		return humanize.Commaf(v)
+	case float32:
+		return humanize.Commaf(float64(v))
+	case int8:
+		return humanize.Comma(int64(v))
+	case int16:
+		return humanize.Comma(int64(v))
+	case int32:
+		return humanize.Comma(int64(v))
+	case int:
+		return humanize.Comma(int64(v))
+	case int64:
+		return humanize.Comma(v)
+	case uint8:
+		return humanize.Comma(int64(v))
+	case uint16:
+		return humanize.Comma(int64(v))
+	case uint32:
+		return humanize.Comma(int64(v))
+	case uint64:
+		return humanize.Comma(int64(v))
+	case time.Time:
+		return v.Format(time.RFC3339)
+	case uint:
+		return humanize.Comma(int64(v))
 	case []byte:
 		return string(v)
 	}
