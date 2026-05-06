@@ -1,3 +1,7 @@
+## v1.3.1 [2026-05-06]
+_What's new?_
+* Hoist `IsFieldArray` regex to package level to eliminate per-call `regexp.MustCompile` allocations on hot transform paths. ([#108](https://github.com/turbot/go-kit/pull/108))
+
 ## v1.3.0 [2025-05-06]
 _What's new?_
 * Add `ToHumanisedString` func to make values more readable.
