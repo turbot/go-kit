@@ -79,16 +79,17 @@ func DereferencePointer(val interface{}) interface{} {
 		TODO: add support for multi-dimensional arrays
 	 	like - arr[1][2] arr[1][2][3] and so on..
 */
+var fieldArrayRe = regexp.MustCompile(`^(.*)\[(\d+)\]$`)
+
 func IsFieldArray(fieldName string) (string, int, bool) {
-	r := regexp.MustCompile(`^(.*)\[(\d+)\]$`)
-	captureGroups := r.FindStringSubmatch(fieldName)
+	captureGroups := fieldArrayRe.FindStringSubmatch(fieldName)
 	if len(captureGroups) == 0 {
 		return "", 0, false
 	}
 	arrayName := captureGroups[1]
 	// check if arrayName contains index and brackets - arr[12]
 	// this would indicate a multi-level array which we do not support at present
-	subGroups := r.FindStringSubmatch(arrayName)
+	subGroups := fieldArrayRe.FindStringSubmatch(arrayName)
 	if len(subGroups) > 0 {
 		return "", 0, false
 	}

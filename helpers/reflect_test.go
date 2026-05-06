@@ -230,6 +230,16 @@ func TestIsFieldArray(t *testing.T) {
 	}
 }
 
+func BenchmarkIsFieldArray(b *testing.B) {
+	inputs := []string{"foo", "bar[3]", "baz[12]", "qux"}
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		for _, s := range inputs {
+			_, _, _ = IsFieldArray(s)
+		}
+	}
+}
+
 //// IsZero ////
 type GetIsZeroTest struct {
 	input    interface{}
